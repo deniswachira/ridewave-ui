@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CarCard from './CarCard';
 import { Car } from '../types/Types';
 
+
 interface CarCardsSectionProps {
     cars: Car[];
 }
@@ -12,6 +13,7 @@ const CarCardsSection: React.FC<CarCardsSectionProps> = ({ cars }) => {
     useEffect(() => {
         setIsVisible(true);
     }, []);
+    // console.log(cars)
 
     return (
         <div className={`container mx-auto mb-5 ${isVisible ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'}`}>

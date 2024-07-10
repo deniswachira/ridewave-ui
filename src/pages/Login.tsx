@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLoginUserMutation } from '../features/api/userApiSlice';
+import {userApi} from '../features/api/userApiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +19,7 @@ type FormValues = {
 
 export default function Login() {
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
-    const [loginUser, { isLoading }] = useLoginUserMutation();
+    const [loginUser, { isLoading }] = userApi.useLoginUserMutation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);

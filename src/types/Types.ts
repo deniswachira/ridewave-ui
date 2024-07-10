@@ -11,6 +11,13 @@ export type UserLoginFormValues = {
     password: string;
 };
 
+export type BookingFormValues = {
+    booking_date: string;
+    returning_date: string;
+    location: string;
+    notes: string;
+};
+
 export type UserState ={
     user: {
         user_id: string;
@@ -23,16 +30,67 @@ export type UserState ={
     loading: boolean;
     error: string | null;
 }
+
+
+export interface TUser {
+    user_id: string;
+    full_name: string;
+    email: string;
+    address: string;
+    phone_number: string;
+}
+
+export interface createBookingResponse {
+    booking_id: number;
+    booking_date: string;
+    returning_date: string;
+    booking_status: string;
+    location: string;
+    total_amount: number;
+    notes: string;
+};
+export interface AuthState {
+    user: null | UserRegisterFormValues | UserLoginFormValues | any;
+    token: string | null;
+    isAuthenticated: boolean;
+}
+
+
 export interface ToastContextProps {
      showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
+// Interface for VehicleSpec
+export interface VehicleSpec {
+  vehicleSpec_id: number;
+  vehicle_name: string;
+  vehicle_model: string;
+  vehicle_year: string;
+  fuel_type: string;
+  seating_capacity: number;
+  color: string;
+  engine_type: string;
+  features: string;
+  vehicle_description: string;
+  image1_url: string;
+  image2_url: string;
+  image3_url: string;
+  created_at: string;
+  updated_at: string;
+}
 
+// Interface for Car
 export interface Car {
-    id: number;
-    make: string;
-    model: string;
-    year: number;
-    image: string;
-    description: string;
-    price: number;
+  vehicle_id: number;
+  vehicleSpec_id: number;
+  rental_rate: string;
+  availability: string;
+  created_at: string;
+  updated_at: string;
+  vehicleSpec: VehicleSpec;
+}
+
+export interface FetchCarsWithSpecsResponse {
+  cars: Car[];
+  loading: boolean;
+  error: string | null;
 }

@@ -4,8 +4,7 @@ import { useForm } from 'react-hook-form';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import loginPic from '../assets/register.svg';
-import { toast } from 'sonner';
-import { useRegisterUserMutation } from '../features/api/userApiSlice';
+import { userApi } from '../features/api/userApiSlice';
 import { UserRegisterFormValues } from '../types/Types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
@@ -14,7 +13,7 @@ import { useToast } from '../components/ToastContext';
 export default function Register() {
     const { register, handleSubmit, formState: { errors } } = useForm<UserRegisterFormValues>();
     const navigate = useNavigate();
-    const [registerUser, { isLoading }] = useRegisterUserMutation();
+    const [registerUser, { isLoading }] = userApi.useRegisterUserMutation();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     const { showToast } = useToast();
 
@@ -30,7 +29,7 @@ export default function Register() {
             showToast('Registration successful! Please log in.', 'success');
             navigate('/login');
         } catch (err: any) {
-            toast.error('Failed to register: ' + (err.data?.msg || err.msg || err.error || err));
+            showToast('Failed to register: ' + (err.data?.msg || err.msg || err.error || err),'error');
         }
     };
 

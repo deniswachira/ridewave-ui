@@ -25,6 +25,8 @@ const Navbar = () => {
         localStorage.removeItem('login');
     }
 
+    
+
     return (
         <div className="navbar bg-gray-800 text-white">
             <div className="navbar-start">
@@ -38,7 +40,7 @@ const Navbar = () => {
                     >
                         <li>
                             <Link to="/" className="flex items-center text-white hover:text-gray-300">
-                                <FaHome className="mr-2" />
+                                <FaHome className="mr-2 text-2xl text-green-600" />
                                 Home
                             </Link>
                         </li>
@@ -50,7 +52,7 @@ const Navbar = () => {
                         </li>
                         <li>
                             <Link to="/contact" className="flex items-center text-white hover:text-gray-300">
-                                <FaPhone className="mr-2" />
+                                <FaPhone className="mr-2 text-2xl text-green-600" />
                                 Contact Us
                             </Link>
                         </li>
@@ -75,8 +77,8 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/contact" className="flex items-center text-white hover:text-gray-300">
-                            <FaPhone className="text-2xl text-green-600 mr-2" />
+                        <Link to="/contact" className="flex items-center text-white  hover:text-gray-300">
+                            <FaPhone className="text-xl text-green-600 mr-2" />
                             Contact Us
                         </Link>
                     </li>
@@ -84,8 +86,8 @@ const Navbar = () => {
             </div>
             <div className="navbar-end">
                 {!isAuthenticated ? (
-                    <Link to="/login" className="btn btn-ghost text-white flex items-center">
-                        <FaSignInAlt className="mr-2" />
+                    <Link to="/login" className="btn btn-ghost text-white text-xl flex items-center">
+                        <FaSignInAlt className="mr-2 mt-1 text-xl text-green-600" />
                         Login
                     </Link>
                 ) : (

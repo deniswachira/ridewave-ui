@@ -1,73 +1,107 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { Calendar, DollarSign, Car, Fuel, Settings, Info,  Airplay, Bluetooth, Camera, Sun, Navigation } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Calendar, Car, Fuel, Settings, Info } from 'lucide-react';
 import Container from "../components/Container";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { RootState } from "../app/store";
+import { useDispatch, useSelector } from "react-redux";
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import heroImg1 from '../assets/background/13685.jpg';
 import heroImg2 from '../assets/background/img2.jpg';
 import heroImg3 from '../assets/background/img2.jpg';
 import heroImg4 from '../assets/background/img1.jpg';
+import { carApi } from "../features/api/carApiSlice";
+import {bookingApi} from "../features/api/bookingApiSlice";
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/ToastContext';
+
+type BookingFormValues = {
+    booking_date: string;
+    returning_date: string;
+    location: string;
+    notes: string;
+};
+type bookingData = {
+    booking_date: string;
+    returning_date: string;
+    location: string;
+    notes: string;
+    vehicle_id: number;
+    user_id: number;
+    total_amount: number;
+};
 
 function CarDetailPage() {
-    const [formData, setFormData] = useState({
-        startDate: '',
-        endDate: '',
-        notes: ''
-    });
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<BookingFormValues>();
+    const [addBooking, { isLoading : addBookingIsLoading }] = bookingApi.useAddBookingMutation();
+    const user_id = user?.user.user_id;
+    const { showToast } = useToast();
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submissionStatus, setSubmissionStatus] = useState('');
+    const [totalAmount, setTotalAmount] = useState(0);
 
-    const car = {
-        make: "Toyota",
-        model: "Camry",
-        year: 2021,
-        price: "$20,000",
-        mileage: "15,000 miles",
-        color: "Blue",
-        fuelType: "Petrol",
-        transmission: "Automatic",
-        description: "The Toyota Camry is a reliable and comfortable sedan offering a smooth ride and excellent fuel efficiency. Equipped with the latest technology and safety features, it is perfect for daily commutes and long drives.",
-        features: [
-            { name: "Air Conditioning", icon: Airplay },
-            { name: "Leather Seats", icon: Settings },
-            { name: "Bluetooth", icon: Bluetooth },
-            { name: "Backup Camera", icon: Camera },
-            { name: "Sunroof", icon: Sun },
-            { name: "Navigation System", icon: Navigation }
-        ]
-    };
+    const vehicle_id = window.location.pathname.split('/')[2];
+    const { data: car, isError:isCarFetch, isLoading } = carApi.useFetchCarByIdWithSpecsQuery(vehicle_id);
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+    useEffect(() => {
+        const bookingDate = new Date(watch('booking_date'));
+        const returningDate = new Date(watch('returning_date'));
+        const rentalRate = car?.vehicleTable.rental_rate || 0;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+        if (bookingDate && returningDate && !isNaN(bookingDate.getTime()) && !isNaN(returningDate.getTime())) {
+            let diffDays = Math.ceil((returningDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24));
+            diffDays = diffDays === 0 ? 1 : diffDays; // count as 1 day if the dates are the same
+            setTotalAmount(diffDays * rentalRate);
+        } else {
+            setTotalAmount(0);
+        }
+    }, [watch('booking_date'), watch('returning_date'), car]);
+
+    if (isLoading) return <div className="flex-grow flex justify-center items-center">
+        <span className="loading loading-dots loading-lg"></span>
+    </div>;
+
+    if (!car) return <div className="flex-grow flex justify-center items-center bottom-0.5">
+        <p>No Vehicle Details available 😒</p>
+    </div>;
+
+    const onSubmit = async (data: BookingFormValues) => {
+        const vehicleIdNumber = parseInt(vehicle_id, 10);
+        // Spread the data object
+        const bookingData = {
+            ...data,
+            vehicle_id: vehicleIdNumber ,
+            user_id: user_id,
+            total_amount: totalAmount,
+        };
+
+        if (!isAuthenticated) {
+            alert('Please login to book this car');
+            navigate('/login');
+            return;
+        }
+        if (vehicleTable.availability === 'Not available') {
+            alert('Sorry, this car is not available for booking');
+            return;
+        }
 
         try {
-            const response = await axios.post('/api/bookings', formData);
-            setSubmissionStatus('Booking submitted successfully!');
-            setFormData({
-                startDate: '',
-                endDate: '',
-                notes: ''
-            });
-        } catch (error) {
-            setSubmissionStatus('Error submitting booking. Please try again.');
-        } finally {
-            setIsSubmitting(false);
+            await addBooking(bookingData).unwrap();
+            showToast('Booking added successful!  proceeding  to Checkout page.', "success");
+            navigate('/dashboard/me');
+           
+        } catch (err: any) {
+            showToast('Failed to Book: ' + (err.data?.msg || err.msg || err.error || err), 'error');
         }
     };
 
+
     const currentDate = new Date().toISOString().split('T')[0];
+    const { vehicleSpecificationTable, vehicleTable } = car;
 
     return (
         <Container className="bg-base-200 flex flex-col gap-6">
@@ -98,89 +132,106 @@ function CarDetailPage() {
                         </Carousel>
                     </div>
                     <div>
-                        <h1 className="text-4xl font-bold text-green-600 mb-4">{car.make} {car.model} ({car.year})</h1>
+                        <h1 className="text-4xl font-bold text-green-600 mb-4">{vehicleSpecificationTable.vehicle_name} {car.model} ({vehicleSpecificationTable.vehicle_model})</h1>
                         <p className="text-2xl text-white mb-4 flex items-center">
-                            <DollarSign className="mr-2" /> {car.price}
+                            Ksh: {vehicleTable.rental_rate}/day
+                            <div className="flex flex-col items-center ml-3">
+                                <span className={`badge ${vehicleTable.availability === 'Available' ? 'badge-success' : 'badge-error'}`}>
+                                    {vehicleTable.availability}
+                                </span>
+                            </div>
                         </p>
-                        <p className="text-xl text-gray-300 mb-6">{car.description}</p>
+
+                        <p className="text-xl text-gray-300 mb-6">{vehicleSpecificationTable.vehicle_description}</p>
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div className="flex items-center">
-                                <Car className="mr-2 text-green-600" /> <strong>Mileage:</strong> {car.mileage}
+                                <Car className="mr-2 text-green-600" /> <strong>Capacity: </strong> {vehicleSpecificationTable.seating_capacity}
                             </div>
                             <div className="flex items-center">
-                                <Calendar className="mr-2 text-green-600" /> <strong>Year:</strong> {car.year}
+                                <Calendar className="mr-2 text-green-600" /> <strong>Year:</strong> {vehicleSpecificationTable.vehicle_year}
                             </div>
                             <div className="flex items-center ">
-                                <Settings className="mr-2 text-green-600" /> <strong>Transmission:</strong> {car.transmission}
+                                <Settings className="mr-2 text-green-600" /> <strong>Transmission:</strong> {vehicleSpecificationTable.engine_type}
                             </div>
                             <div className="flex items-center">
-                                <Fuel className="mr-2 text-green-600" /> <strong>Fuel Type:</strong> {car.fuelType}
+                                <Fuel className="mr-2 text-green-600" /> <strong>Fuel Type:</strong> {vehicleSpecificationTable.fuel_type}
                             </div>
                             <div className="flex items-center">
-                                <Info className="mr-2 text-green-600" /> <strong>Color:</strong> {car.color}
+                                <Info className="mr-2 text-green-600" /> <strong>Color:</strong> {vehicleSpecificationTable.color}
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold text-green-600 mb-4">Features</h2>
-                        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4 list-disc list-inside text-white mb-6">
-                            {car.features.map((feature, index) => (
-                                <li key={index} className="flex items-center">
-                                    <feature.icon className="text-4xl text-green-600 mr-4" /> {feature.name}
-                                </li>
-                            ))}
-                        </ul>
+                        <h2 className="text-3xl font-bold text-green-600 mb-4">Additional Features</h2>
+                        {vehicleSpecificationTable.features}
                     </div>
                 </div>
                 <div className="mt-12">
                     <h2 className="text-3xl font-bold text-green-600 mb-6 text-center">Book This Car</h2>
-                    {submissionStatus && (
-                        <div className={`text-center mb-6 ${submissionStatus.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
-                            {submissionStatus}
-                        </div>
-                    )}
-                    <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" onSubmit={handleSubmit}>
+                    <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" onSubmit={handleSubmit(onSubmit)}>
                         <div className="col-span-1">
                             <label className="block text-white mb-2">Start Date</label>
                             <input
                                 type="date"
-                                name="startDate"
+                                {...register('booking_date', { required: 'Start Date is required' })}
                                 className="input input-bordered w-full"
-                                value={formData.startDate}
-                                onChange={handleChange}
-                                required
                                 min={currentDate}
                             />
+                            {errors.booking_date && <span className="text-red-500">{errors.booking_date.message}</span>}
                         </div>
                         <div className="col-span-1">
                             <label className="block text-white mb-2">End Date</label>
                             <input
                                 type="date"
-                                name="endDate"
+                                {...register('returning_date', { required: 'End Date is required' })}
                                 className="input input-bordered w-full"
-                                value={formData.endDate}
-                                onChange={handleChange}
-                                required
-                                min={formData.startDate || currentDate}
+                                min={currentDate}
                             />
+                            {errors.returning_date && <span className="text-red-500">{errors.returning_date.message}</span>}
+                        </div>
+                        <div className="col-span-1">
+                            <label className="block text-white mb-2">Location</label>
+                            <select
+                                {...register('location', { required: 'Location is required' })}
+                                className="input input-bordered w-full"
+                            >
+                                <option value="">Select a location</option>
+                                <option value="Nairobi">Nairobi</option>
+                                <option value="Mombasa">Mombasa</option>
+                                <option value="Kisumu">Kisumu</option>
+                                <option value="Nakuru">Nakuru</option>
+                            </select>
+                            {errors.location && <span className="text-red-500">{errors.location.message}</span>}
                         </div>
                         <div className="col-span-3">
                             <label className="block text-white mb-2">Additional Notes</label>
                             <textarea
-                                name="notes"
+                                {...register('notes')}
                                 className="textarea textarea-bordered w-full"
                                 placeholder="Enter any additional notes"
-                                value={formData.notes}
-                                onChange={handleChange}
                             ></textarea>
                         </div>
+                        <div className="col-span-3">
+                            <label className="block text-white mb-2">Total Amount</label>
+                            <input
+                                type="text"
+                                value={`Ksh: ${totalAmount}`}
+                                className="input input-bordered w-full"
+                                readOnly
+                            />
+                        </div>
                         <div className="col-span-3 flex justify-center">
-                            <button
-                                type="submit"
-                                className={`btn btn-primary px-6 py-3 ${isSubmitting ? 'loading' : ''}`}
-                                disabled={isSubmitting}
-                            >
-                                Submit Booking
+                            <button type="submit" className="btn bg-green-400 text-white py-3 pb-10 px-10 rounded-lg text-lg transform transition-transform duration-300 hover:scale-105 hover:bg-green-600">
+                                {addBookingIsLoading ? <span className="loading loading-spinner text-info"></span> : 'Submit Booking'}
                             </button>
                         </div>
+                        {/* <div className="col-span-3 flex justify-center">
+                            <button
+                                type="submit"
+                                className={`btn btn-warning px-6 py-3 ${addBookingIsLoading ? 'loading' : 'Submit Booking'}`}
+                                
+                            >
+                                
+                            </button>
+                        </div> */}
                     </form>
                 </div>
             </div>

@@ -1,7 +1,20 @@
 import { SquareUserRound, LogOut, Tags, Ticket } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { clearCredentials } from "../features/auth/authSlice";
+import { useToast } from "../components/ToastContext";
+
 
 function SideNav() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+
+    const handleLogout = () => {
+        dispatch(clearCredentials());
+        navigate('/login');
+        showToast('Logout successful!', 'success');
+    };
     return (
         <ul className="menu bg-base-200 min-w-full gap-2 text-base-content min-h-full">
             <li>
@@ -23,10 +36,10 @@ function SideNav() {
                 </Link>
             </li>
             <li>
-                <Link to="#" className="flex items-center">
+                <button onClick={ handleLogout } className="flex items-center">
                     <LogOut className="text-4xl text-green-600 mr-4" />
                     <span className="hidden lg:inline ml-2">Logout</span>
-                </Link>
+                </button>
             </li>
             <li>
                 <Link to="/" className="flex items-center">
