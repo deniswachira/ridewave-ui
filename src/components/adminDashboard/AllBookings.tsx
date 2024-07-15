@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { bookingApi } from '../../features/api/bookingApiSlice';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 
 interface Booking {
     booking_id: number;
@@ -45,27 +45,27 @@ function AllBookings() {
         );
     }, [searchQuery, bookings]);
 
-    const handleDelete = async (bookingId: number) => {
-        try {
-            const confirmed = await Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to delete this booking?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'No, cancel!',
-            });
+    // const handleDelete = async (bookingId: number) => {
+    //     try {
+    //         const confirmed = await Swal.fire({
+    //             title: 'Are you sure?',
+    //             text: "Do you really want to delete this booking?",
+    //             icon: 'warning',
+    //             showCancelButton: true,
+    //             confirmButtonText: 'Yes, delete it!',
+    //             cancelButtonText: 'No, cancel!',
+    //         });
 
-            if (confirmed.isConfirmed) {
-                setBookings(prevBookings => prevBookings.filter(booking => booking.booking_id !== bookingId));
-                setFilteredBookings(prevFiltered => prevFiltered.filter(booking => booking.booking_id !== bookingId));
-                Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
-            }
-        } catch (error) {
-            console.error('Error deleting booking:', error);
-            Swal.fire('Error', 'Unable to delete booking', 'error');
-        }
-    };
+    //         if (confirmed.isConfirmed) {
+    //             setBookings(prevBookings => prevBookings.filter(booking => booking.booking_id !== bookingId));
+    //             setFilteredBookings(prevFiltered => prevFiltered.filter(booking => booking.booking_id !== bookingId));
+    //             Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error deleting booking:', error);
+    //         Swal.fire('Error', 'Unable to delete booking', 'error');
+    //     }
+    // };
 
     const handlePageChange = (newPage: number) => {
         setPage(newPage);

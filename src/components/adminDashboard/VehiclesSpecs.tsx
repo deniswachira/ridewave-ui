@@ -25,7 +25,7 @@ const VehiclesSpecs: React.FC = () => {
         refetchOnMountOrArgChange: true,
         pollingInterval: 60000
     });
-    const [deleteCarSpec, { isLoading: deleteIsLoading }] = carApi.useDeleteCarSpecMutation();
+    const [deleteCarSpec, {}] = carApi.useDeleteCarSpecMutation();
     const { showToast } = useToast();
     const [specs, setSpecs] = useState<VehicleSpecs[]>([]);
     const [filteredSpecs, setFilteredSpecs] = useState<VehicleSpecs[]>([]);
@@ -63,8 +63,8 @@ const VehiclesSpecs: React.FC = () => {
         if (result.isConfirmed) {
             try {
                 console.log('Delete vehicleSpec_id:', vehicleSpec_id);
-                const response = await deleteCarSpec(vehicleSpec_id).unwrap();
-                showToast(response.msg, 'success');
+                await deleteCarSpec(vehicleSpec_id).unwrap();
+                showToast("Deleted Successfully", 'success');
 
             } catch (error: any) {
                 console.error('Error deleting vehicle Specification:', error.data.msg);

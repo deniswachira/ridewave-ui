@@ -17,7 +17,7 @@ interface Booking {
 
 function NewBookings() {
 
-  const { data: Allbookings = [], isLoading, isError } = bookingApi.useFetchBookingsQuery({});
+  const { data: Allbookings = []} = bookingApi.useFetchBookingsQuery({});
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [page, setPage] = useState(1);

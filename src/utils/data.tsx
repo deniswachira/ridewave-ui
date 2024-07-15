@@ -1,4 +1,4 @@
-import { DevicePhoneMobileIcon, AdjustmentsHorizontalIcon, SunIcon, } from "@heroicons/react/24/solid";
+import { DevicePhoneMobileIcon, SunIcon, } from "@heroicons/react/24/solid";
 import { SearchCode } from 'lucide-react';
 
 import benefitOneImg from "../assets/benefit-one.png";

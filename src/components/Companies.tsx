@@ -1,7 +1,4 @@
 import bmw from "../assets/logos/bmw.png"
-import chevrolet from "../assets/logos/chevrolet.svg"
-import lexus from "../assets/logos/lexus.svg"
-import mercedes from "../assets/logos/mercedes.svg"
 
 export default function Companies() {
     return (

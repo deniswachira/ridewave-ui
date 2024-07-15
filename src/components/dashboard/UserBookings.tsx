@@ -5,8 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import Swal from 'sweetalert2';
 import { useToast } from '../../components/ToastContext';
-import { loadStripe } from '@stripe/stripe-js';
-import axios from "axios";
+import { Trash } from "lucide-react";
 
 function UserBookings() {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -17,7 +16,6 @@ function UserBookings() {
   const { data: bookings = [], isLoading, isError } = bookingApi.useFetchBookingsByUserIdQuery(user_id);
   const [deleteBooking, { isLoading: deleteIsLoading }] = bookingApi.useDeleteBookingMutation();
   const [displayedBookings, setDisplayedBookings] = useState<createBookingResponse[]>([]);
-  const [disabledButtons, setDisabledButtons] = useState<number[]>([]);
   const bookingsPerPage = 8;
 
   useEffect(() => {
@@ -48,27 +46,6 @@ function UserBookings() {
     }
   };
 
-  const handleCheckout = async (booking_id: number) => {
-    setDisabledButtons(prev => [...prev, booking_id]); // Disable the button
-    try {
-      const stripe = await loadStripe("pk_test_51PYWkuRsls6dWz1RBvlMFpPhiI1J9szlUjGxpgAvIXsx2kiC9OWDvnWD6PsEwbUU6CTdw0FJ2O3b0Y6rSXAZ0hc200wJCewxdF");
-      const booking = displayedBookings.find(booking => booking.booking_id === booking_id);
-      const header = { 'Content-Type': 'application/json' };
-
-      const response = await axios(`http://localhost:8000/create-checkout-session/${booking_id}`, {
-        method: 'POST',
-        headers: header,
-        data: JSON.stringify(booking),
-      });
-
-      const session = response.data;
-      const result = await stripe?.redirectToCheckout({ sessionId: session.id });
-    } catch (error) {
-      console.error('Error checking out booking:', error);
-      setDisabledButtons(prev => prev.filter(id => id !== booking_id)); // Re-enable the button in case of error
-    }
-  };
-
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
@@ -90,22 +67,18 @@ function UserBookings() {
           {pendingBookings.map(booking => (
             <div key={booking.booking_id} className="card w-full bg-base-200 shadow-xl">
               <div className="card-body">
-                <h3 className="card-title">Booking ID: {booking.booking_id}</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="card-title">Booking ID: {booking.booking_id}</h3>
+                  <span className="badge badge-warning">Pending</span>
+                </div>
                 <p>Booking Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
                 <div className="card-actions justify-end">
                   <button
-                    className="btn btn-warning"
+                    className="btn btn-error"
                     onClick={() => handleDelete(booking.booking_id)}
                     disabled={deleteIsLoading}
                   >
-                    Delete
-                  </button>
-                  <button
-                    className="btn btn-success"
-                    onClick={() => handleCheckout(booking.booking_id)}
-                    disabled={disabledButtons.includes(booking.booking_id)}
-                  >
-                    Checkout
+                    <Trash className="mr-2" /> Delete
                   </button>
                 </div>
               </div>

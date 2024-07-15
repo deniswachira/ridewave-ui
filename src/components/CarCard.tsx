@@ -1,8 +1,7 @@
 import React from 'react';
 import { Users, Fuel } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Car } from '../types/Types'; // Import the Car type interface
-import image from '../assets/background/13685.jpg';
+import { Car } from '../types/Types'; 
 
 interface CarCardProps {
     car: Car;

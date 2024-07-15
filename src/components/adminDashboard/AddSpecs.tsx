@@ -28,6 +28,7 @@ const AddSpecs = () => {
 
     const preset_key = "orcuzpnl";
     const cloud_name = "dosid37ll";
+    
     const [image1, setImage1] = useState<string>("");
     const [image2, setImage2] = useState<string>("");
     const [image3, setImage3] = useState<string>("");

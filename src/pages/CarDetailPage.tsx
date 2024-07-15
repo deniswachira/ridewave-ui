@@ -5,13 +5,9 @@ import Container from "../components/Container";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { RootState } from "../app/store";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import heroImg1 from '../assets/background/13685.jpg';
-import heroImg2 from '../assets/background/img2.jpg';
-import heroImg3 from '../assets/background/img2.jpg';
-import heroImg4 from '../assets/background/img1.jpg';
 import { carApi } from "../features/api/carApiSlice";
 import {bookingApi} from "../features/api/bookingApiSlice";
 import { useNavigate } from 'react-router-dom';
@@ -23,21 +19,21 @@ type BookingFormValues = {
     location: string;
     notes: string;
 };
-type bookingData = {
-    booking_date: string;
-    returning_date: string;
-    location: string;
-    notes: string;
-    vehicle_id: number;
-    user_id: number;
-    total_amount: number;
-};
+// type bookingData = {
+//     booking_date: string;
+//     returning_date: string;
+//     location: string;
+//     notes: string;
+//     vehicle_id: number;
+//     user_id: number;
+//     total_amount: number;
+// };
 
 function CarDetailPage() {
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-    const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<BookingFormValues>();
+    const { register, handleSubmit, watch, formState: { errors, } } = useForm<BookingFormValues>();
     const [addBooking, { isLoading : addBookingIsLoading }] = bookingApi.useAddBookingMutation();
     const user_id = user?.user.user_id;
     const { showToast } = useToast();
@@ -45,7 +41,7 @@ function CarDetailPage() {
     const [totalAmount, setTotalAmount] = useState(0);
 
     const vehicle_id = window.location.pathname.split('/')[2];
-    const { data: car, isError:isCarFetch, isLoading } = carApi.useFetchCarByIdWithSpecsQuery(vehicle_id);
+    const { data: car,  isLoading } = carApi.useFetchCarByIdWithSpecsQuery(vehicle_id);
 
     useEffect(() => {
         const bookingDate = new Date(watch('booking_date'));

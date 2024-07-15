@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../app/store";
+// import { useSelector } from "react-redux";
+// import { RootState } from "../../app/store";
 import { useToast } from '../../components/ToastContext';
 
 const dummyTickets = [
@@ -29,7 +29,7 @@ const dummyTickets = [
 ];
 
 function UserTickets() {
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth);
   const { showToast } = useToast();
 
   const [page, setPage] = useState(1);
