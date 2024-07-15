@@ -5,10 +5,14 @@ import { RootState } from "../../app/store";
 import { useSelector } from "react-redux";
 import { Trash, Check, Calendar, DollarSign } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
+import { useToast } from '../ToastContext';
+import Swal from 'sweetalert2';
+import AnimatedLoader from '../AnimatedLoader';
 
 interface createPaymentResponse {
   payment_id: number;
   payment_amount: number;
+  user_id: number;
   payment_status: string;
   payment_date: string;
   booking: {
@@ -30,8 +34,10 @@ const Payment = () => {
   const [disabledButtons, setDisabledButtons] = useState<number[]>([]);
   const { user } = useSelector((state: RootState) => state.auth);
   const user_id = user?.user.user_id;
+  const { showToast } = useToast();
   const [displayedPayments, setDisplayedPayments] = useState<createPaymentResponse[]>([]);
-  const { data: fetchedPayments = [], isLoading } = bookingApi.useGetPaymentsByUserIdQuery(user_id);
+  const { data: fetchedPayments = [], isLoading ,refetch} = bookingApi.useGetPaymentsByUserIdQuery(user_id);
+  const [deletePayment,{isLoading: deleteIsLoading}] = bookingApi.useDeletePaymentMutation();
 
   useEffect(() => {
     setDisplayedPayments(fetchedPayments);
@@ -54,22 +60,45 @@ const Payment = () => {
       const response = await axios.post(`http://localhost:8000/create-checkout-session/${payment_id}`, {
         payment_id: payment.payment_id,
         payment_amount: payment.payment_amount,
+        booking_id: payment.booking.booking_id,
+        user_id: payment.user_id,
+        payment_mode: 'card',
       }, {
         headers: header,
       });
 
       const session = response.data;
+      console.log('Session:', session.payment);
+      showToast(session.payment, 'success');
+      refetch();
       await stripe?.redirectToCheckout({ sessionId: session.id });
     } catch (error) {
       console.error('Error checking out payment:', error);
-      setDisabledButtons(prev => prev.filter(id => id !== payment_id)); // Re-enable the button in case of error
+      setDisabledButtons(prev => prev.filter(id => id !== payment_id)); 
     }
   };
 
 
-  const handleDelete = (payment_id: number) => {
-    // Implement delete functionality here
-    console.log('Delete payment with ID:', payment_id);
+  const handleDelete = async(payment_id: number) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+    try {      
+       await deletePayment(payment_id);
+        refetch();
+        showToast('Payment deleted successfully 🎉', 'success');
+      }catch (error) {
+      console.error('Error deleting payment:', error);
+      showToast('Error deleting payment', 'error');
+    }
+  }
   };
 
   return (
@@ -78,7 +107,7 @@ const Payment = () => {
 
       {isLoading ? (
         <div className="flex justify-center items-center">
-          <div className="loader border-t-4 border-b-4 border-white rounded-full w-12 h-12"></div>
+         <AnimatedLoader/>
         </div>
       ) : (
         <div className="flex flex-wrap gap-4 mb-6">
@@ -102,6 +131,7 @@ const Payment = () => {
                     <button
                       className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
                       onClick={() => handleDelete(payment.payment_id)}
+                      disabled={deleteIsLoading}
                     >
                       <Trash /> Delete
                     </button>
@@ -124,7 +154,7 @@ const Payment = () => {
         <h2 className="text-2xl font-bold mb-4">Payment History</h2>
         {isLoading ? (
           <div className="flex justify-center items-center">
-            <div className="loader border-t-4 border-b-4 border-white rounded-full w-12 h-12"></div>
+            <AnimatedLoader />
           </div>
         ) : (
           <table className="table w-full">

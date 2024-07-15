@@ -1,6 +1,6 @@
 import { apiDomain } from '../../proxxy/proxxy';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { AddSpecsFormValues } from '../../types/Types';
+import { AddSpecsFormValues, AddVehiclePayload } from '../../types/Types';
 // import { FetchCarsWithSpecsResponse } from '../../types/Types';
 
 export const carApi = createApi({
@@ -16,13 +16,13 @@ export const carApi = createApi({
     fetchCarByIdWithSpecs: builder.query({
       query: (vehicle_id) => `vehicles-with-specs/${vehicle_id}`,
     }),
-    addCar: builder.mutation<void, { make: string, model: string, year: number }>({
-      query: ({ make, model, year }) => ({
+    addVehicle: builder.mutation<AddVehiclePayload, Partial<AddVehiclePayload>>({
+      query: (addVehiclePayload: AddVehiclePayload) => ({
         url: 'vehicles',
         method: 'POST',
-        body: { make, model, year },
+        body: addVehiclePayload,
       }),
-      invalidatesTags: ["fetchCarsWithSpecs"] as const
+      invalidatesTags: ["fetchCarsWithSpecs"] 
     }),
     updateCar: builder.mutation<void, { id: number, make: string, model: string, year: number }>({
       query: ({ id, make, model, year }) => ({
@@ -30,14 +30,21 @@ export const carApi = createApi({
         method: 'PUT',
         body: { make, model, year },
       }),
-      invalidatesTags: ["fetchCarsWithSpecs"] as const
+      invalidatesTags: ["fetchCarsWithSpecs"] 
     }),
-    deleteCar: builder.mutation<void, number>({
-      query: (id) => ({
-        url: `vehicles/${id}`,
+    deleteVehicleSpec: builder.mutation({
+      query: (vehicleSpec_id) => ({
+        url: `vehicles-spec/${vehicleSpec_id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ["fetchCarsWithSpecs"] as const
+      invalidatesTags: ["fetchCarsWithSpecs"] 
+    }),
+    deleteVehicle: builder.mutation({
+      query: (vehicle_id) => ({
+        url: `vehicles/${vehicle_id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["fetchCarsWithSpecs"] 
     }),
     addCarSpec: builder.mutation<AddSpecsFormValues,Partial<AddSpecsFormValues>>({
       query: (addSpecsPayload:AddSpecsFormValues) => ({

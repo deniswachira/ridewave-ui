@@ -8,6 +8,7 @@ import CarCardsSection from "../components/CarCardsSection";
 import AboutUs from "../components/AboutUs";
 import { carApi } from "../features/api/carApiSlice";
 import { Car } from "../types/Types";
+import AnimatedLoader from "../components/AnimatedLoader";
 
 const Home = () => { 
   const page = 1; 
@@ -30,7 +31,7 @@ const Home = () => {
         <Navbar />
         <Hero />
         <div className="flex-grow flex justify-center items-center">
-          {isLoading && <span className="loading loading-dots loading-lg"></span>}
+          {isLoading && <AnimatedLoader />}
           {!isLoading && isError && <p>Error: {isError.toString()}</p>}
           {!isLoading && !isError && cars.length === 0 && <p>No cars available 😒</p>}
         </div>

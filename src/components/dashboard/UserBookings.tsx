@@ -6,6 +6,7 @@ import { RootState } from "../../app/store";
 import Swal from 'sweetalert2';
 import { useToast } from '../../components/ToastContext';
 import { Trash } from "lucide-react";
+import AnimatedLoader from "../AnimatedLoader";
 
 function UserBookings() {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -58,7 +59,7 @@ function UserBookings() {
       <h1 className="text-3xl font-bold text-center mb-4">My Bookings</h1>
       <div>
         <h2 className="text-3xl font-semibold mb-4">Pending Bookings</h2>
-        {isLoading && <span className="loading loading-dots loading-lg"></span>}
+        {isLoading && <AnimatedLoader />}
         {!isLoading && isError && <p className="text-red-500 text-center">Error: {isError.toString()}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {pendingBookings.length === 0 && (

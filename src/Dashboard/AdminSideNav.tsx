@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 
 export default function AdminSideNav() {
     return (
-        <ul className="menu bg-base-200  min-w-full gap-2 text-base-content min-h-full">
+        <ul className="menu bg-base-300  min-w-fit gap-2  min-h-full">
             <li>
                 <li> <Link to=""> <AreaChart className="text-4xl text-green-600 mr-4" /> Analytics</Link></li>                  
             </li>

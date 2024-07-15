@@ -12,6 +12,7 @@ import { carApi } from "../features/api/carApiSlice";
 import {bookingApi} from "../features/api/bookingApiSlice";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastContext';
+import AnimatedLoader from '../components/AnimatedLoader';
 
 type BookingFormValues = {
     booking_date: string;
@@ -58,7 +59,7 @@ function CarDetailPage() {
     }, [watch('booking_date'), watch('returning_date'), car]);
 
     if (isLoading) return <div className="flex-grow flex justify-center items-center">
-        <span className="loading loading-dots loading-lg"></span>
+        <AnimatedLoader />
     </div>;
 
     if (!car) return <div className="flex-grow flex justify-center items-center bottom-0.5">

@@ -7,6 +7,7 @@ import { Car } from '../types/Types';
 import image from '../assets/background/13685.jpg';
 import { Fuel, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AnimatedLoader from '../components/AnimatedLoader';
 
 type FilterOption = '' | number | string;
 
@@ -120,8 +121,8 @@ function Explore() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full px-4">
                         {/* Loading state */}
                         {isLoading && (
-                            <div className="flex-grow flex justify-center items-center">
-                                <span className="loading loading-dots loading-lg"></span>
+                            <div className="flex justify-center items-center">
+                                <AnimatedLoader />
                             </div>
                         )}
                         {/* Error state */}

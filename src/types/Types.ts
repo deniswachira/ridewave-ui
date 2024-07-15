@@ -51,6 +51,12 @@ export interface createBookingResponse {
     total_amount: number;
     notes: string;
 };
+export interface AddVehiclePayload {
+  vehicleSpec_id: number;
+  rental_rate: string;
+  availability: string;
+}
+
 
 export interface AddSpecsFormValues {
     vehicle_name: string;

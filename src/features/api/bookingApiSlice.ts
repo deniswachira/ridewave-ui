@@ -51,6 +51,13 @@ export const bookingApi = createApi({
       query: () => 'payments',
       providesTags: ["payments"]
     }),
+    deletePayment: builder.mutation({
+      query: (payment_id) => ({
+        url: `payments/${payment_id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["payments"] 
+    }),
     getPaymentsByUserId: builder.query({
       query: (user_id) => `payments-with-user-id/${user_id}`,
       providesTags: ["payments"]

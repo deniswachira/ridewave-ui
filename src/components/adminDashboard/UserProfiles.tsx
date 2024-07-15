@@ -73,7 +73,7 @@ const UserProfiles = () => {
   const paginatedUsers = filteredUsers.slice((page - 1) * usersPerPage, page * usersPerPage);
 
   return (
-    <div className="container mx-auto py-12 px-4">
+    <div className="container mx-auto py-2 px-4">
       <h1 className="text-4xl font-bold text-center mb-8">User Profiles</h1>
       <div className="mb-4 flex justify-between">
         <input
