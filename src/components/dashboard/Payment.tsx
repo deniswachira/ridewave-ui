@@ -3,7 +3,7 @@ import axios from 'axios';
 import { bookingApi } from "../../features/api/bookingApiSlice";
 import { RootState } from "../../app/store";
 import { useSelector } from "react-redux";
-import { Trash, Check, Calendar, DollarSign } from 'lucide-react';
+import { Trash, Calendar, DollarSign } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useToast } from '../ToastContext';
 import Swal from 'sweetalert2';
@@ -38,6 +38,7 @@ const Payment = () => {
   const [displayedPayments, setDisplayedPayments] = useState<createPaymentResponse[]>([]);
   const { data: fetchedPayments = [], isLoading ,refetch} = bookingApi.useGetPaymentsByUserIdQuery(user_id);
   const [deletePayment,{isLoading: deleteIsLoading}] = bookingApi.useDeletePaymentMutation();
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setDisplayedPayments(fetchedPayments);
@@ -45,6 +46,7 @@ const Payment = () => {
 
   const handleCheckout = async (payment_id: number) => {
     setDisabledButtons(prev => [...prev, payment_id]); // Disable the button
+    setLoading(true);
     try {
       const stripe = await stripePromise;
       const payment = displayedPayments.find((payment: createPaymentResponse) => payment.payment_id === payment_id);
@@ -52,6 +54,7 @@ const Payment = () => {
       if (!payment) {
         console.error('Payment not found');
         setDisabledButtons(prev => prev.filter(id => id !== payment_id));
+        setLoading(false);
         return;
       }
 
@@ -75,6 +78,8 @@ const Payment = () => {
     } catch (error) {
       console.error('Error checking out payment:', error);
       setDisabledButtons(prev => prev.filter(id => id !== payment_id)); 
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,11 +141,12 @@ const Payment = () => {
                       <Trash /> Delete
                     </button>
                     <button
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
+                      key={payment.payment_id}
                       onClick={() => handleCheckout(payment.payment_id)}
-                      disabled={disabledButtons.includes(payment.payment_id)}
+                      disabled={disabledButtons.includes(payment.payment_id) || loading}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                     >
-                      <Check /> Checkout
+                      {loading && disabledButtons.includes(payment.payment_id) ? 'Processing...' : 'Checkout'}
                     </button>
                   </div>
                 </div>

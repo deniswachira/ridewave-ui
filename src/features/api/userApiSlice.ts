@@ -8,7 +8,7 @@ import { apiDomain } from '../../proxxy/proxxy';
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({ baseUrl: apiDomain }),
-  tagTypes: ['users'],
+  tagTypes: ['users', 'user'],
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (credentials: UserLoginFormValues, ) => ({
@@ -30,7 +30,7 @@ export const userApi = createApi({
     }),
     getUserProfile: builder.query({
       query: (userId: number) => `users/${userId}`,  
-      providesTags: ["users"]    
+      providesTags: ["user"]    
     }),
     updateUserProfile: builder.mutation<TUser,Partial<TUser>>({
       query: ({ user_id, ...patch }) => ({
@@ -38,7 +38,7 @@ export const userApi = createApi({
         method: 'PUT',
         body: patch,
       }),
-      invalidatesTags: ["users"]
+      invalidatesTags: ["user"]
     }),
     deleteUserProfile: builder.mutation({
       query: (user_id) => ({
