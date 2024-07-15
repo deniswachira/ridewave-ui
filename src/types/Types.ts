@@ -33,11 +33,13 @@ export type UserState ={
 
 
 export interface TUser {
-    user_id: string;
+    msg: any;
+    user_id: number;
     full_name: string;
     email: string;
     address: string;
     phone_number: string;
+    role: string;
 }
 
 export interface createBookingResponse {
@@ -49,6 +51,21 @@ export interface createBookingResponse {
     total_amount: number;
     notes: string;
 };
+
+export interface AddSpecsFormValues {
+    vehicle_name: string;
+    vehicle_model: string;
+    vehicle_year: string;
+    fuel_type: string;
+    seating_capacity: number;
+    color: string;
+    engine_type: string;
+    features: string;
+    vehicle_description: string;
+    image1_url: string;
+    image2_url: string;
+    image3_url: string;
+}
 export interface AuthState {
     user: null | UserRegisterFormValues | UserLoginFormValues | any;
     token: string | null;
@@ -93,4 +110,20 @@ export interface FetchCarsWithSpecsResponse {
   cars: Car[];
   loading: boolean;
   error: string | null;
+}
+
+// Admin Dashboard
+export interface Booking {
+  date: string;
+  count: number;
+}
+
+export interface Revenue {
+  month: string;
+  amount: number;
+}
+
+export interface BookingStatus {
+  status: string;
+  count: number;
 }

@@ -1,13 +1,13 @@
-// src/features/api/carApiSlice.ts
-
+import { apiDomain } from '../../proxxy/proxxy';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { AddSpecsFormValues } from '../../types/Types';
 // import { FetchCarsWithSpecsResponse } from '../../types/Types';
 
 export const carApi = createApi({
   reducerPath: 'carApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }), 
+  baseQuery: fetchBaseQuery({ baseUrl: apiDomain }), 
   refetchOnReconnect: true,
-  tagTypes: ['fetchCarsWithSpecs'],
+  tagTypes: ['fetchCarsWithSpecs', 'fetchCarSpecs'],
   endpoints: (builder) => ({
     fetchCarsWithSpecs: builder.query({
       query: () => 'vehicles-with-specs',
@@ -38,6 +38,24 @@ export const carApi = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ["fetchCarsWithSpecs"] as const
+    }),
+    addCarSpec: builder.mutation<AddSpecsFormValues,Partial<AddSpecsFormValues>>({
+      query: (addSpecsPayload:AddSpecsFormValues) => ({
+        url: `vehicles-spec`,
+        method: 'POST',
+        body: addSpecsPayload,
+      }),
+    }),
+    getCarSpecs: builder.query({
+      query: () => 'vehicles-spec',
+      providesTags: ["fetchCarSpecs"]
+    }),
+    deleteCarSpec: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `vehicles-spec/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["fetchCarSpecs"] 
     }),
   }),
   

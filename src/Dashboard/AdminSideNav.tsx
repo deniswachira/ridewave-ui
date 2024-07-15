@@ -1,4 +1,4 @@
-import { Users, SquareUserRound, LogOut, AreaChart, Tags } from "lucide-react"
+import { Users, SquareUserRound, LogOut, AreaChart, Tags, Car } from "lucide-react"
 import { Link } from "react-router-dom"
 
 export default function AdminSideNav() {
@@ -11,7 +11,7 @@ export default function AdminSideNav() {
                 <details >
                     <summary><Users className="text-4xl text-green-600 mr-4" />User Profiles </summary>
                     <ul>
-                        <li><Link to="all-users"> User</Link></li>
+                        {/* <li><Link to="all-users"> User</Link></li> */}
                         <li><Link to="all-user-profiles">UsersProfiles</Link></li>
                     </ul>
                 </details>
@@ -20,8 +20,8 @@ export default function AdminSideNav() {
                 <details >
                     <summary><Tags className="text-4xl text-green-600 mr-4" />Bookings</summary>
                     <ul>
+                        <li><Link to="new-bookings" className=" text-green-600">New Bookings</Link></li>
                         <li><Link to="all-bookings">All Bookings</Link></li>
-                        <li><Link to="confirmed-bookings">Confirmed</Link></li>
                     </ul>
                 </details>
             </li>
@@ -29,8 +29,18 @@ export default function AdminSideNav() {
                 <details >
                     <summary><Tags className="text-4xl text-green-600 mr-4" />Payments</summary>
                     <ul>
-                        <li><Link to="all-bookings">All Payments</Link></li>
-                        <li><Link to="confirmed-bookings">Confirmed</Link></li>
+                        <li><Link to="payments">All Payments</Link></li>
+                        {/* <li><Link to="confirmed-bookings">Confirmed</Link></li> */}
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details >
+                    <summary><Car className="text-4xl text-green-600 mr-4" />Vehicles</summary>
+                    <ul>
+                        <li><Link to="vehicle-specs">Vehicle Specs</Link></li>
+                        <li><Link to="add-vehicle">Add Vehicle</Link></li>
+                        {/* <li><Link to="confirmed-bookings">Confirmed</Link></li> */}
                     </ul>
                 </details>
             </li>
@@ -38,13 +48,13 @@ export default function AdminSideNav() {
                 <details >
                     <summary><Tags className="text-4xl text-green-600 mr-4" />Tickets</summary>
                     <ul>
-                        <li><Link to="all-bookings">All Tickets</Link></li>
-                        <li><Link to="confirmed-bookings">Pending</Link></li>
+                        <li><Link to="tickets">All Tickets</Link></li>
+                        {/* <li><Link to="confirmed-bookings">Pending</Link></li> */}
                     </ul>
                 </details>
             </li>
             <li>
-                <Link to="me"><SquareUserRound className="text-4xl text-green-600 mr-4" />Me</Link>
+                <Link to="admin-profile"><SquareUserRound className="text-4xl text-green-600 mr-4" />Me</Link>
             </li>
             <li>
                 <Link to="#"><LogOut className="text-4xl text-green-600 mr-4" />Logout</Link>

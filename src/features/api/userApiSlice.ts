@@ -2,11 +2,13 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { UserRegisterFormValues } from '../../types/Types';
 import { UserLoginFormValues } from '../../types/Types';
 import { TUser } from '../../types/Types';
+import { apiDomain } from '../../proxxy/proxxy';
 
 
 export const userApi = createApi({
   reducerPath: 'userApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: apiDomain }),
+  tagTypes: ['users'],
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (credentials: UserLoginFormValues, ) => ({
@@ -22,7 +24,29 @@ export const userApi = createApi({
         body: userRegisterPayload,
       }),
     }),
+    getUsersProfiles: builder.query({
+      query: () => 'users',
+      providesTags: ["users"]
+    }),
+    getUserProfile: builder.query({
+      query: (userId: number) => `users/${userId}`,  
+      providesTags: ["users"]    
+    }),
+    updateUserProfile: builder.mutation<TUser,Partial<TUser>>({
+      query: ({ user_id, ...patch }) => ({
+        url: `users/${user_id}`,
+        method: 'PUT',
+        body: patch,
+      }),
+      invalidatesTags: ["users"]
+    }),
+    deleteUserProfile: builder.mutation({
+      query: (user_id) => ({
+        url: `users/${user_id}`,
+        method: 'DELETE',
+      }),
   }),
+}),
 });
 
 

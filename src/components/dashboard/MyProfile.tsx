@@ -1,28 +1,52 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaEdit, FaTimes, FaTrophy, FaHistory, FaHeart } from 'react-icons/fa';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { useNavigate } from 'react-router-dom';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { userApi } from '../../features/api/userApiSlice';
+import { useToast } from '../../components/ToastContext';
 
+interface FormValues {
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+}
 
 const MyProfile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  let profilePicture = 'https://via.placeholder.com/150';  
+  const [updateProfile, { isLoading }] = userApi.useUpdateUserProfileMutation();
+  let profilePicture = 'https://via.placeholder.com/150';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
   };
+
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.user.role === 'user') {
       navigate('/dashboard/me');
-    }else{
+    } else {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);
+
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      await updateProfile({ ...data, user_id: user?.user.user_id }).unwrap();
+      showToast('Profile updated successfully!', 'success');
+      handleModalToggle();
+    } catch (error) {
+      showToast('Failed to update profile. Please try again.', 'error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white py-10 px-5">
@@ -74,15 +98,8 @@ const MyProfile = () => {
           <div className="bg-gray-700 rounded-lg p-4 md:col-span-2">
             <h3 className="text-2xl font-bold mb-3">Booking History</h3>
             <ul className="list-disc list-inside text-gray-400">
-              {/* {user.bookingHistory.map((booking, index) => (
-                <li key={index}>
-                  {booking.date} - {booking.car} ({booking.status})
-                </li>
-              ))} */}
-              
               <li>2024-07-01 - Toyota Camry (Completed)</li>
               <li>2024-06-15 - Ford F-150 (Completed)</li>
-             
             </ul>
           </div>
         </div>
@@ -97,7 +114,7 @@ const MyProfile = () => {
                 <FaTimes />
               </button>
             </div>
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
                 <label htmlFor="fullName" className="block text-sm font-medium text-gray-300">Full Name</label>
                 <input
@@ -105,7 +122,9 @@ const MyProfile = () => {
                   id="fullName"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
                   defaultValue={user?.user.full_name}
+                  {...register('full_name', { required: 'Full Name is required' })}
                 />
+                {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name.message}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email</label>
@@ -114,7 +133,9 @@ const MyProfile = () => {
                   id="email"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
                   defaultValue={user?.user.email}
+                  {...register('email', { required: 'Email is required' })}
                 />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-300">Phone</label>
@@ -122,8 +143,10 @@ const MyProfile = () => {
                   type="text"
                   id="phone"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
-                  defaultValue={user?.user.contact_phone}
+                  defaultValue={user?.user.phone_number}
+                  {...register('phone', { required: 'Phone number is required' })}
                 />
+                {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-300">Address</label>
@@ -132,9 +155,11 @@ const MyProfile = () => {
                   id="address"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
                   defaultValue={user?.user.address}
+                  {...register('address', { required: 'Address is required' })}
                 />
+                {errors.address && <p className="text-red-500 text-sm">{errors.address.message}</p>}
               </div>
-              <button type="submit" className="btn btn-primary w-full">
+              <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
                 Save Changes
               </button>
             </form>

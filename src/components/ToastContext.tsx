@@ -1,18 +1,31 @@
-import React, { createContext, useContext, useState } from 'react';
-import { toast, Toaster } from 'sonner';
+// Correct import statement for 'react-hot-toast'
+import React, { createContext, useContext,  ReactNode } from 'react';
+import { toast, Toaster } from 'react-hot-toast';
 import { ToastContextProps } from '../types/Types';
-
 
 const ToastContext = createContext<ToastContextProps | undefined>(undefined);
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
-    const [toastType, setToastType] = useState<'success' | 'error' | 'info' | 'warning'>('info');
-
+export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    // Removed unused state hooks toastMessage and toastType
     const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
-        setToastMessage(message);
-        setToastType(type);
-        toast(message, { type });
+        // Directly use toast[type] without setting unused state
+        switch (type) {
+            case 'success':
+                toast.success(message);
+                break;
+            case 'error':
+                toast.error(message);
+                break;
+            case 'info':
+                toast(message); // Assuming 'info' uses the default toast
+                break;
+            case 'warning':
+                toast(message); // Assuming there's no direct 'warning' method, using default toast
+                break;
+            default:
+                toast(message); // Fallback to default toast
+                break;
+        }
     };
 
     return (

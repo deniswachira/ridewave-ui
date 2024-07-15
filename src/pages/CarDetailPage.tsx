@@ -92,7 +92,7 @@ function CarDetailPage() {
         try {
             await addBooking(bookingData).unwrap();
             showToast('Booking added successful!  proceeding  to Checkout page.', "success");
-            navigate('/dashboard/me');
+            navigate('/dashboard/me/my-bookings');
            
         } catch (err: any) {
             showToast('Failed to Book: ' + (err.data?.msg || err.msg || err.error || err), 'error');
@@ -117,18 +117,18 @@ function CarDetailPage() {
                             showThumbs={false}
                             showStatus={false}
                         >
-                            <div>
-                                <img src={heroImg1} alt="Car Image 1" />
+                            <div > 
+                                <img src={vehicleSpecificationTable.image1_url} alt="Car Image 1" className="rounded-lg w-64 h-100" />
                             </div>
-                            <div>
-                                <img src={heroImg2} alt="Car Image 2" />
+                            <div >
+                                <img src={vehicleSpecificationTable.image2_url} alt="Car Image 2" className="rounded-lg w-64 h-100" />
                             </div>
-                            <div>
-                                <img src={heroImg3} alt="Car Image 3" />
-                            </div>
-                            <div>
+                            <div >
+                                <img src={vehicleSpecificationTable.image3_url} alt="Car Image 3" className="rounded-lg w-64 h-100" />
+                            </div >
+                            {/* <div>
                                 <img src={heroImg4} alt="Car Image 4" />
-                            </div>
+                            </div> */}
                         </Carousel>
                     </div>
                     <div>

@@ -1,15 +1,20 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { createBookingResponse} from '../../types/Types';
 import {BookingFormValues} from '../../types/Types';
+import { apiDomain } from '../../proxxy/proxxy';
 
 
 export const bookingApi = createApi({
   reducerPath: 'bookingApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
-  tagTypes: ['bookings'],
+  baseQuery: fetchBaseQuery({ baseUrl: apiDomain }),
+  tagTypes: ['bookings', 'payments'],
   endpoints: (builder) => ({
     fetchBookings: builder.query({
       query: () => 'bookings',
+      providesTags: ["bookings"]
+    }),
+    fetchBookingsWithUserDetails: builder.query({
+      query: () => 'bookings-user-with-userdetails',
       providesTags: ["bookings"]
     }),
     fetchBookingById: builder.query({
@@ -41,6 +46,14 @@ export const bookingApi = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ["bookings"] 
+    }),
+    getPayments: builder.query({
+      query: () => 'payments',
+      providesTags: ["payments"]
+    }),
+    getPaymentsByUserId: builder.query({
+      query: (user_id) => `payments-with-user-id/${user_id}`,
+      providesTags: ["payments"]
     }),
   }),
 });

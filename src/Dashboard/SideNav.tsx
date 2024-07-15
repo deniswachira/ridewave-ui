@@ -30,6 +30,12 @@ function SideNav() {
                 </Link>
             </li>
             <li>
+                <Link to="my-payments" className="flex items-center">
+                    <Ticket className="text-4xl text-green-600 mr-4" />
+                    <span className="hidden lg:inline ml-2">Payments</span>
+                </Link>
+            </li>
+            <li>
                 <Link to="tickets" className="flex items-center">
                     <Ticket className="text-4xl text-green-600 mr-4" />
                     <span className="hidden lg:inline ml-2">Tickets</span>

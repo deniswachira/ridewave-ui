@@ -11,15 +11,33 @@ import UserTickets from './components/dashboard/UserTickets.tsx'
 import UserProfiles from './components/adminDashboard/UserProfiles.tsx'
 import AdminDashboard from './pages/AdminDashboard.tsx'
 import Analytics from './components/adminDashboard/Analytics.tsx'
-import Users from './components/adminDashboard/Users.tsx'
 import MyProfile from './components/dashboard/MyProfile.tsx'
 import CarDetailPage from './pages/CarDetailPage.tsx'
+import AllBookings from './components/adminDashboard/AllBookings.tsx'
+import NewBookings from './components/adminDashboard/NewBookings.tsx'
+import AllPayments from './components/adminDashboard/AllPayments.tsx'
+import AdminProfile from './components/adminDashboard/AdminProfile.tsx'
+import BookingDetails from './components/adminDashboard/BookingDetails.tsx'
+import AllTicket from './components/adminDashboard/AllTicket.tsx'
+import VehiclesSpecs from './components/adminDashboard/VehiclesSpecs.tsx'
+import AddSpecs from './components/adminDashboard/AddSpecs.tsx'
+import Upload from './pages/Upload.tsx'
+import { useSelector } from 'react-redux'
+import { RootState } from './app/store.ts'
+import Success from './pages/Success.tsx'
+import Failed from './pages/Failed.tsx'
+import Payment from './components/dashboard/Payment.tsx'
 
+// const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
     errorElement: <Error />,
+  },
+  {
+    path: "upload",
+    element: <Upload />,
   },
   {
     path: 'explore',
@@ -37,6 +55,16 @@ const router = createBrowserRouter([
     errorElement: <Error />,
   },
   {
+    path: 'success',
+    element: <Success />,
+    errorElement: <Error />,
+  },
+  {
+    path: 'failed',
+    element: <Failed />,
+    errorElement: <Error />,
+  },
+  {
     path: 'contact',
     element: <Contact />,
     errorElement: <Error />,
@@ -48,7 +76,7 @@ const router = createBrowserRouter([
   },
   {
     path: 'dashboard/me',
-    element: <Dashboard />,
+    element:  <Dashboard />,
     errorElement: <Error />,
     children: [
       {
@@ -58,6 +86,10 @@ const router = createBrowserRouter([
       {
         path: "my-bookings",
         element: <UserBookings />,
+      },
+      {
+        path: "my-payments",
+        element: <Payment />,
       },
       {
         path: "tickets",
@@ -76,32 +108,48 @@ const router = createBrowserRouter([
         element: <Analytics />,
       },
       {
-        path: "me",
-        element: <MyProfile />,
-      },
-      {
-        path: "all-users",
-        element: <Users />,
+        path: "admin-profile",
+        element: <AdminProfile />,
       },
       {
         path: "all-user-profiles",
         element: <UserProfiles />,
       },
       {
+        path: "new-bookings",
+        element: <NewBookings />,
+      },
+     
+      {
+        path: "new-bookings/bookings-details/:booking_id",
+        element: <BookingDetails />,
+      },      
+      {
         path: "all-bookings",
-        element: <Users />,
+        element: <AllBookings />,       
       },
       {
-        path: "confirmed-bookings",
-        element: <UserProfiles />,
+        path: "vehicle-specs",
+        element: <VehiclesSpecs />,
       },
       {
-        path: "pending-bookings",
-        element: <UserProfiles />,
-      }
+        path: "vehicle-specs/add-vehicle-spec",
+        element: <AddSpecs />,
+      },      
+      {
+        path: "payments",
+        element: <AllPayments />,
+      },
+      {
+        path: "tickets",
+        element: <AllTicket />,
+      },
+      
     ]
 
   },
+
+  
 ])
 
 

@@ -13,7 +13,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
 
     return (
         <div className="rounded-lg overflow-hidden shadow-md bg-gray-800 text-white transition transform hover:scale-105">
-            <img src={image} alt={`${vehicleSpec.vehicle_name} ${vehicleSpec.vehicle_model}`} className="w-full h-40 object-cover" />
+            <img src={vehicleSpec.image1_url} alt={`${vehicleSpec.vehicle_name} ${vehicleSpec.vehicle_model}`} className="w-full h-40 object-cover" />
             <div className="p-4">
                 <h2 className="text-xl font-bold mb-2">{vehicleSpec.vehicle_name} {vehicleSpec.vehicle_model}</h2>
                 {/* <p className="text-gray-400 mb-2">{vehicleSpec.vehicle_year}</p> */}

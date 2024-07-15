@@ -19,7 +19,7 @@ type FormValues = {
 
 export default function Login() {
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
-    const [loginUser, { isLoading }] = userApi.useLoginUserMutation();
+    const [loginUser, { isLoading  }] = userApi.useLoginUserMutation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -35,7 +35,15 @@ export default function Login() {
         try {
             const user = await loginUser(data).unwrap();
             dispatch(setCredentials({ user, token: user.token }));
-            navigate('/dashboard/me');
+            if(user.role === 'admin') {
+                navigate('/dashboard/admin')
+
+            }else if(user.role === 'user'){
+                navigate('/dashboard/me')
+            }
+            else{
+                navigate('/')
+            };
             showToast('Login successful!', 'success');
         } catch (err: any) {
             toast.error('Failed to login: ' + (err.data?.msg || err.msg || err.error || err));
