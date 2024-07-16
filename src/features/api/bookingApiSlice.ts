@@ -7,7 +7,7 @@ import { apiDomain } from '../../proxxy/proxxy';
 export const bookingApi = createApi({
   reducerPath: 'bookingApi',
   baseQuery: fetchBaseQuery({ baseUrl: apiDomain }),
-  tagTypes: ['bookings', 'payments'],
+  tagTypes: ['bookings', 'payments', 'booking'],
   endpoints: (builder) => ({
     fetchBookings: builder.query({
       query: () => 'bookings',
@@ -19,6 +19,7 @@ export const bookingApi = createApi({
     }),
     fetchBookingById: builder.query({
       query: (booking_id) => `bookings/${booking_id}`,
+      providesTags: ["booking"]
     }),
     fetchBookingsByUserId: builder.query({
       query: (user_id) => `users/${user_id}/bookings`,
@@ -32,13 +33,13 @@ export const bookingApi = createApi({
       }),
       invalidatesTags: ["bookings"] 
     }),
-    updateBooking: builder.mutation<void, { id: number, car_id: number, start_date: string, end_date: string }>({
-      query: ({ id, car_id, start_date, end_date }) => ({
-        url: `bookings/${id}`,
+    updateBooking: builder.mutation < createBookingResponse, Partial<createBookingResponse>>({
+      query: ({ booking_id, ...patch }) => ({
+        url: `bookings/${booking_id}`,
         method: 'PUT',
-        body: { car_id, start_date, end_date },
+        body: patch,
       }),
-      invalidatesTags: ["bookings"] 
+      invalidatesTags: ["booking"] 
     }),
     deleteBooking: builder.mutation({
       query: (booking_id) => ({

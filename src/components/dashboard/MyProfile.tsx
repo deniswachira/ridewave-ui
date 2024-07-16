@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FaEdit, FaTimes, FaTrophy, FaHistory, FaHeart } from 'react-icons/fa';
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -15,7 +15,6 @@ interface FormValues {
 }
 
 const MyProfile = () => {
-  // const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -29,12 +28,12 @@ const MyProfile = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.user.role === 'user') {
-      navigate('/dashboard/me');
-    } else {
+    if (!isAuthenticated) {
       navigate('/login');
+    } else if (user?.user.role !== 'user') {
+      navigate('/dashboard/me');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
 

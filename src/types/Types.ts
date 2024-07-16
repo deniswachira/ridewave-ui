@@ -49,7 +49,9 @@ export interface createBookingResponse {
     booking_status: string;
     location: string;
     total_amount: number;
+    checkout_status: string;
     notes: string;
+    msg: string;
 };
 export interface AddVehiclePayload {
   vehicleSpec_id: number;

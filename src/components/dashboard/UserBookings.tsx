@@ -4,9 +4,10 @@ import { createBookingResponse } from "../../types/Types";
 import { useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import Swal from 'sweetalert2';
+import { loadStripe } from '@stripe/stripe-js';
 import { useToast } from '../../components/ToastContext';
-import { Trash } from "lucide-react";
-import AnimatedLoader from "../AnimatedLoader";
+import axios from "axios";
+const stripePromise = loadStripe('pk_test_51PYWkuRsls6dWz1RBvlMFpPhiI1J9szlUjGxpgAvIXsx2kiC9OWDvnWD6PsEwbUU6CTdw0FJ2O3b0Y6rSXAZ0hc200wJCewxdF'); 
 
 function UserBookings() {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -16,6 +17,7 @@ function UserBookings() {
   const [page, setPage] = useState(1);
   const { data: bookings = [], isLoading, isError } = bookingApi.useFetchBookingsByUserIdQuery(user_id);
   const [deleteBooking, { isLoading: deleteIsLoading }] = bookingApi.useDeleteBookingMutation();
+  const [updateBooking] = bookingApi.useUpdateBookingMutation();
   const [displayedBookings, setDisplayedBookings] = useState<createBookingResponse[]>([]);
   const bookingsPerPage = 8;
 
@@ -47,6 +49,38 @@ function UserBookings() {
     }
   };
 
+  const handleCheckout = async (booking_id: number) => {
+    try {
+      setDisplayedBookings(prevBookings =>
+        prevBookings.map(booking =>
+          booking.booking_id === booking_id ? { ...booking, checkout_status: 'Awaiting Admin Approval' } : booking
+        )
+      );
+      const response = await updateBooking({ booking_id, checkout_status: 'Awaiting Admin Approval' }).unwrap();
+      showToast(response.msg, 'success');
+
+      // Your existing checkout logic here...
+      const stripe = await stripePromise;
+      const booking = displayedBookings.find(booking => booking.booking_id === booking_id);
+      
+      const header = { 'Content-Type': 'application/json' };
+
+      const checkoutResponse = await axios.post(`http://localhost:8000/create-checkout-session/${booking_id}`, JSON.stringify(booking), {
+        headers: header,
+      });
+
+      const session = checkoutResponse.data;
+      await stripe?.redirectToCheckout({ sessionId: session.id });
+    } catch (error) {
+      console.error('Error checking out booking:', error);
+      setDisplayedBookings(prevBookings =>
+        prevBookings.map(booking =>
+          booking.booking_id === booking_id ? { ...booking, checkout_status: 'Checkout' } : booking
+        )
+      );
+    }
+  };
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
@@ -59,27 +93,32 @@ function UserBookings() {
       <h1 className="text-3xl font-bold text-center mb-4">My Bookings</h1>
       <div>
         <h2 className="text-3xl font-semibold mb-4">Pending Bookings</h2>
-        {isLoading && <AnimatedLoader />}
+        {isLoading && <span className="loading loading-dots loading-lg"></span>}
         {!isLoading && isError && <p className="text-red-500 text-center">Error: {isError.toString()}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {pendingBookings.length === 0 && (
             <p className="text-center">No pending bookings available 😒</p>
           )}
           {pendingBookings.map(booking => (
-            <div key={booking.booking_id} className="card w-full bg-base-200 shadow-xl">
+            <div key={booking.booking_id} className="card w-full bg-base-100 shadow-xl">
               <div className="card-body">
-                <div className="flex justify-between items-center">
-                  <h3 className="card-title">Booking ID: {booking.booking_id}</h3>
-                  <span className="badge badge-warning">Pending</span>
-                </div>
+                <h3 className="card-title">Booking ID: {booking.booking_id}</h3>
                 <p>Booking Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
+                <p>Total Amount: Ksh {booking.total_amount}</p> {/* Added total_amount here */}
                 <div className="card-actions justify-end">
                   <button
-                    className="btn btn-error"
+                    className="btn btn-warning"
                     onClick={() => handleDelete(booking.booking_id)}
                     disabled={deleteIsLoading}
                   >
-                    <Trash className="mr-2" /> Delete
+                    Delete
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => handleCheckout(booking.booking_id)}
+                    disabled={booking.checkout_status === 'Awaiting Admin Approval'}
+                  >
+                    {booking.checkout_status === 'Awaiting Admin Approval' ? "Awaiting Admin Approval" : "Checkout"}
                   </button>
                 </div>
               </div>
@@ -92,7 +131,7 @@ function UserBookings() {
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
-              <tr className="text-white">
+              <tr>
                 <th>Booking ID</th>
                 <th>Booking Date</th>
                 <th>Returning Date</th>
@@ -126,7 +165,7 @@ function UserBookings() {
         <div className="flex justify-center mt-8">
           <div className="btn-group">
             <button
-              className="btn mr-4 btn-outline"
+              className="btn"
               disabled={page === 1}
               onClick={() => handlePageChange(page - 1)}
             >
