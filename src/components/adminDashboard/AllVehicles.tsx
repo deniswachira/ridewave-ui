@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { carApi } from '../../features/api/carApiSlice';
-import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useToast } from '../ToastContext';
 import { AddVehiclePayload } from '../../types/Types';
@@ -22,41 +21,36 @@ export interface VehicleSpecs {
     image2_url: string;
     image3_url: string;
 }
+export interface Vehicle {
+    vehicle_id: number;
+    vehicleSpec_id: number;
+    rental_rate: number;
+    availability: string; 
+    vehicleSpec: VehicleSpecs;   
+}
 
-const VehiclesSpecs: React.FC = () => {
-    const { data: vehicleSpecs = [], isLoading, error } = carApi.useGetCarSpecsQuery({
+const AllVehicles: React.FC = () => {
+   
+    const {data: vehicles = [], isError,isLoading:vehicleIsloading} = carApi.useFetchCarsWithSpecsQuery({
         refetchOnMountOrArgChange: true,
         pollingInterval: 60000,
     });
     const [addVehicle, { isLoading: isAddingVehicle }] = carApi.useAddVehicleMutation();
     const [deleteCarSpec, ] = carApi.useDeleteVehicleSpecMutation();
     const { showToast } = useToast();
-    const [specs, setSpecs] = useState<VehicleSpecs[]>([]);
-    const [filteredSpecs, setFilteredSpecs] = useState<VehicleSpecs[]>([]);
+    const [vehiclesData, setVehiclesData] = useState<Vehicle[]>([]);
     const [page, setPage] = useState<number>(1);
     const specsPerPage: number = 5;
-    const [searchQuery, setSearchQuery] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
     const [selectedVehicleSpecId, setSelectedVehicleSpecId] = useState<number | null>(null); // Selected vehicle spec ID
     const [rentalRate, setRentalRate] = useState<number | ''>(''); // Rental rate state
     const [availability, setAvailability] = useState<string>('Available');
 
-
     useEffect(() => {
-        if (vehicleSpecs) {
-            setSpecs(vehicleSpecs);
-            setFilteredSpecs(vehicleSpecs);
+        if (vehicles) {
+            setVehiclesData(vehicles);
         }
-    }, [vehicleSpecs]);
-
-    useEffect(() => {
-        setFilteredSpecs(
-            specs.filter(spec =>
-                spec.vehicle_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                spec.vehicle_model.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        );
-    }, [searchQuery, specs]);
+    }, [vehicles]); 
 
     const handleDelete = async (vehicleSpec_id: number) => {
         const result = await Swal.fire({
@@ -107,71 +101,55 @@ const VehiclesSpecs: React.FC = () => {
         }
     };
 
-    const paginatedSpecs = filteredSpecs.slice((page - 1) * specsPerPage, page * specsPerPage);
+    const paginatedSpecs = vehiclesData.slice((page - 1) * specsPerPage, page * specsPerPage);
 
-    if (isLoading) {
-        return <div className="text-center"> <AnimatedLoader/> Loading Vehicle Specs...</div>;
+    if (vehicleIsloading) {
+        return <div className="text-center"> <AnimatedLoader/> Loading Vehicles...</div>;
     }
 
-    if (error) {
-        return <div className="text-center text-red-500">Error loading vehicle specs</div>;
+    if (isError) {
+        return <div className="text-center text-red-500">Error loading vehicle</div>;
     }
 
     return (
         <div className="container mx-auto py-5 px-4">
-            <h1 className="text-xl font-bold text-center">All Vehicle Specifications</h1>
-            <div className="mb-4 flex justify-between">
-                <Link to="add-vehicle-spec">
-                    <button type="button" className="btn btn-warning btn-outline"><SquarePlus />Add Vehicle Specifications</button>
-                </Link>
-                <input
-                    type="text"
-                    placeholder="Search by model or car name to filter specs"
-                    className="input input-bordered w-full max-w-xs"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
+            <h1 className="text-xl font-bold text-center">All Vehicles </h1>
+           
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Vehicle ID</th>
                             <th>Vehicle Name</th>
-                            <th>Vehicle Model</th>
-                            <th>Engine Type</th>
-                            <th>Seating Capacity</th>
-                            <th>Vehicle Year</th>
-                            <th>Color</th>
+                            <th>Rental rate</th>
+                            <th>Availability</th>                            
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {paginatedSpecs.length === 0 ? (
                             <tr>
-                                <td colSpan={8} className="text-center">No specs available 😒</td>
+                                <td colSpan={8} className="text-center">No Vehicle available 😒</td>
                             </tr>
                         ) : (
-                            paginatedSpecs.map(spec => (
-                                <tr key={spec.vehicleSpec_id}>
-                                    <td>{spec.vehicleSpec_id}</td>
-                                    <td>{spec.vehicle_name}</td>
-                                    <td>{spec.vehicle_model}</td>
-                                    <td>{spec.engine_type}</td>
-                                    <td>{spec.seating_capacity}</td>
-                                    <td>{spec.vehicle_year}</td>
-                                    <td>{spec.color}</td>
+                            paginatedSpecs.map(vehicle => (
+                                <tr key={vehicle.vehicle_id}>
+                                    <td>{vehicle.vehicle_id}</td>
+                                    <td>{vehicle.vehicleSpec.vehicle_name}</td>
+                                    <td>{vehicle.rental_rate}</td>
+                                    <td>{vehicle.availability}</td>
+                                    
                                     <td>
                                         <button
                                             className="btn btn-info btn-outline mr-2"
                                             onClick={() => {
-                                                setSelectedVehicleSpecId(spec.vehicleSpec_id);
+                                                setSelectedVehicleSpecId(vehicle.vehicle_id);
                                                 setIsModalOpen(true);
                                             }}
                                         >
-                                            <SquarePlus /> Add Vehicle
+                                            <SquarePlus /> Edit Vehicle
                                         </button>
-                                        <button className="btn btn-error btn-outline" onClick={() => handleDelete(spec.vehicleSpec_id)}> <Trash className="text-red-500" /> </button>
+                                        <button className="btn btn-error btn-outline" onClick={() => handleDelete(vehicle.vehicle_id)}> <Trash className="text-red-500" /> </button>
                                     </td>
                                 </tr>
                             ))
@@ -190,7 +168,7 @@ const VehiclesSpecs: React.FC = () => {
                     </button>
                     <button
                         className="btn"
-                        disabled={page === Math.ceil(filteredSpecs.length / specsPerPage)}
+                        disabled={page === Math.ceil(vehiclesData.length / specsPerPage)}
                         onClick={() => handlePageChange(page + 1)}
                     >
                         Next
@@ -240,4 +218,4 @@ const VehiclesSpecs: React.FC = () => {
     );
 };
 
-export default VehiclesSpecs;
+export default AllVehicles;

@@ -26,6 +26,7 @@ import Success from './pages/Success';
 import Failed from './pages/Failed';
 import Payment from './components/dashboard/Payment';
 import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute
+import AllVehicles from './components/adminDashboard/AllVehicles';
 
 const router = createBrowserRouter([
   {
@@ -135,6 +136,10 @@ const router = createBrowserRouter([
       {
         path: "vehicle-specs",
         element: <VehiclesSpecs />,
+      },
+      {
+        path: "vehicles",
+        element: <AllVehicles />,
       },
       {
         path: "vehicle-specs/add-vehicle-spec",

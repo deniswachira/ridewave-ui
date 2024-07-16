@@ -39,7 +39,7 @@ export const bookingApi = createApi({
         method: 'PUT',
         body: patch,
       }),
-      invalidatesTags: ["booking"] 
+      invalidatesTags: ["booking", "bookings"] 
     }),
     deleteBooking: builder.mutation({
       query: (booking_id) => ({

@@ -39,7 +39,7 @@ export default function AdminSideNav() {
                     <summary><Car className="text-4xl text-green-600 mr-4" />Vehicles</summary>
                     <ul>
                         <li><Link to="vehicle-specs">Vehicle Specs</Link></li>
-                        <li><Link to="add-vehicle">Add Vehicle</Link></li>
+                        <li><Link to="vehicles">Vehicles</Link></li>
                         {/* <li><Link to="confirmed-bookings">Confirmed</Link></li> */}
                     </ul>
                 </details>

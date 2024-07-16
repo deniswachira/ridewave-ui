@@ -8,6 +8,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useToast } from '../../components/ToastContext';
 import axios from "axios";
 import {  apiDomain } from "../../proxxy/proxxy";
+import AnimatedLoader from "../AnimatedLoader";
 const stripePromise = loadStripe('pk_test_51PYWkuRsls6dWz1RBvlMFpPhiI1J9szlUjGxpgAvIXsx2kiC9OWDvnWD6PsEwbUU6CTdw0FJ2O3b0Y6rSXAZ0hc200wJCewxdF'); 
 
 function UserBookings() {
@@ -94,7 +95,12 @@ function UserBookings() {
       <h1 className="text-3xl font-bold text-center mb-4">My Bookings</h1>
       <div>
         <h2 className="text-3xl font-semibold mb-4">Pending Bookings</h2>
-        {isLoading && <span className="loading loading-dots loading-lg"></span>}
+        {isLoading && 
+        <>        
+        <AnimatedLoader/>
+        <span className="">Loading...</span>
+        </>
+        }
         {!isLoading && isError && <p className="text-red-500 text-center">Error: {isError.toString()}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {pendingBookings.length === 0 && (

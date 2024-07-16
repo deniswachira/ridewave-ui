@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { bookingApi } from '../../features/api/bookingApiSlice';
+import AnimatedLoader from "../AnimatedLoader";
 // import Swal from 'sweetalert2';
 
 interface Booking {
@@ -43,29 +44,8 @@ function AllBookings() {
                 booking.location.toLowerCase().includes(searchQuery.toLowerCase())
             )
         );
-    }, [searchQuery, bookings]);
-
-    // const handleDelete = async (bookingId: number) => {
-    //     try {
-    //         const confirmed = await Swal.fire({
-    //             title: 'Are you sure?',
-    //             text: "Do you really want to delete this booking?",
-    //             icon: 'warning',
-    //             showCancelButton: true,
-    //             confirmButtonText: 'Yes, delete it!',
-    //             cancelButtonText: 'No, cancel!',
-    //         });
-
-    //         if (confirmed.isConfirmed) {
-    //             setBookings(prevBookings => prevBookings.filter(booking => booking.booking_id !== bookingId));
-    //             setFilteredBookings(prevFiltered => prevFiltered.filter(booking => booking.booking_id !== bookingId));
-    //             Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error deleting booking:', error);
-    //         Swal.fire('Error', 'Unable to delete booking', 'error');
-    //     }
-    // };
+    }, [searchQuery, bookings]);   
+    
 
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
@@ -74,7 +54,7 @@ function AllBookings() {
     const paginatedBookings = filteredBookings.slice((page - 1) * bookingsPerPage, page * bookingsPerPage);
 
     if (isLoading) {
-        return <div className="text-center">Loading...</div>;
+        return <div className="text-center"> <AnimatedLoader/> Loading Booking...</div>;
     }
 
     if (error) {

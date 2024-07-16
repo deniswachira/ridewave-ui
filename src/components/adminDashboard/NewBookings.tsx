@@ -1,32 +1,34 @@
 import { useEffect, useState } from "react";
-import axios from 'axios';
 import { bookingApi } from "../../features/api/bookingApiSlice";
+import { paymentApi } from "../../features/api/paymentApiSlice";
+import AnimatedLoader from "../AnimatedLoader";
 
 interface Booking {
+  checkout_status: string;
   booking_id: number;
   user_id: string;
   vehicle_id: string;
   booking_date: string;
   returning_date: string;
   total_amount: number;
-  location: string;  
+  location: string;
   booking_status: 'approved' | 'pending' | 'rejected';
 }
 
-
-
 function NewBookings() {
-
-  const { data: Allbookings = []} = bookingApi.useFetchBookingsQuery({});
+  const { data: Allbookings = [] } = bookingApi.useFetchBookingsQuery({});
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [page, setPage] = useState(1);
   const bookingsPerPage = 5;
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null); // State to track selected booking for popup
-  const [paymentDetails, setPaymentDetails] = useState<any>(null); // State to store payment details
-  const [loadingPayment, setLoadingPayment] = useState(false); // Loading state for payment details
-   useEffect(() => {
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const { data: paymentDetails, isLoading: loadingPayment } = paymentApi.useGetPaymentByBookingIdQuery(selectedBooking?.booking_id || 0, {
+    skip: !selectedBooking,
+  });
+  const [updateBooking, { isLoading: updateIsLoading }] = bookingApi.useUpdateBookingMutation();
+
+  useEffect(() => {
     if (Allbookings.length > 0) {
       setBookings(Allbookings);
     }
@@ -36,7 +38,7 @@ function NewBookings() {
     setFilteredBookings(
       bookings.filter(booking =>
         booking.booking_status === 'pending' &&
-        (booking.location.toLowerCase().includes(searchQuery.toLowerCase()))
+        booking.location.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
   }, [searchQuery, bookings]);
@@ -45,38 +47,41 @@ function NewBookings() {
     setPage(newPage);
   };
 
-  const openPopup = async (booking: Booking) => {
+  const openPopup = (booking: Booking) => {
     setSelectedBooking(booking);
-    setLoadingPayment(true);
-    try {
-      // Replace with actual API endpoint to fetch payment details
-      const response = await axios.get(`/api/payments/${booking.booking_id}`);
-      setPaymentDetails(response.data);
-    } catch (error) {
-      console.error('Error fetching payment details:', error);
-    } finally {
-      setLoadingPayment(false);
-    }
   };
 
   const closePopup = () => {
     setSelectedBooking(null);
-    setPaymentDetails(null);
   };
 
   const approveBooking = async () => {
+    if (!selectedBooking) return;
     try {
-      // Replace with actual API endpoint and logic to approve booking
-      await axios.put(`/api/bookings/${selectedBooking?.booking_id}/approve`);
-      // Update booking status locally after approval
+      await updateBooking({ booking_id: selectedBooking.booking_id, booking_status: 'approved' }).unwrap();
       setBookings(prevBookings =>
         prevBookings.map(booking =>
-          booking.booking_id === selectedBooking?.booking_id ? { ...booking, booking_status: 'approved' } : booking
+          booking.booking_id === selectedBooking.booking_id ? { ...booking, booking_status: 'approved' } : booking
         )
       );
       closePopup();
     } catch (error) {
       console.error('Error approving booking:', error);
+    }
+  };
+
+  const rejectBooking = async () => {
+    if (!selectedBooking) return;
+    try {
+      await updateBooking({ booking_id: selectedBooking.booking_id, booking_status: 'rejected' }).unwrap();
+      setBookings(prevBookings =>
+        prevBookings.map(booking =>
+          booking.booking_id === selectedBooking.booking_id ? { ...booking, booking_status: 'rejected' } : booking
+        )
+      );
+      closePopup();
+    } catch (error) {
+      console.error('Error rejecting booking:', error);
     }
   };
 
@@ -122,11 +127,6 @@ function NewBookings() {
                   <td>
                     <button className="btn btn-primary" onClick={() => openPopup(booking)}>View Details</button>
                   </td>
-                  {/* <td>
-                    <Link to={`bookings-details/${booking.booking_id}`}>
-                      <button className="btn btn-secondary" disabled>View Details</button>
-                    </Link>
-                  </td> */}
                 </tr>
               ))
             )}
@@ -152,7 +152,6 @@ function NewBookings() {
         </div>
       </div>
 
-      {/* Popup / Modal */}
       {selectedBooking && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-md w-full">
@@ -178,7 +177,7 @@ function NewBookings() {
                   <tr>
                     <td className="font-semibold">Location:</td>
                     <td>{selectedBooking.location}</td>
-                  </tr>                 
+                  </tr>
                   <tr>
                     <td className="font-semibold">Booking Date:</td>
                     <td>{new Date(selectedBooking.booking_date).toLocaleDateString()}</td>
@@ -191,31 +190,43 @@ function NewBookings() {
                     <td className="font-semibold">Amount:</td>
                     <td>Ksh {selectedBooking.total_amount}</td>
                   </tr>
+                  <tr>
+                    <td className="font-semibold">Checkout Status:</td>
+                    <td>{selectedBooking.checkout_status}</td>
+                  </tr>
                 </tbody>
               </table>
               <hr className="my-4" />
               <h3 className="text-lg font-semibold mb-2">Payment Details</h3>
               {loadingPayment ? (
+                <>
+                <AnimatedLoader />
                 <p>Loading payment details...</p>
+                </>
+
               ) : paymentDetails ? (
                 <table className="table-auto w-full">
                   <tbody>
+                    <tr>
+                      <td className="font-semibold">Booking ID:</td>
+                      <td>{paymentDetails.booking_id}</td>
+                    </tr>
                     <tr>
                       <td className="font-semibold">Payment ID:</td>
                       <td>{paymentDetails.payment_id}</td>
                     </tr>
                     <tr>
                       <td className="font-semibold">Amount Paid:</td>
-                        <td>Ksh {paymentDetails.payment_amount}</td>
+                      <td>Ksh {paymentDetails.payment_amount}</td>
                     </tr>
                     <tr>
                       <td className="font-semibold">Payment Date:</td>
                       <td>{new Date(paymentDetails.payment_date).toLocaleDateString()}</td>
                     </tr>
-                      <tr>
-                        <td className="font-semibold">Payment Status:</td>
-                        <td>{new Date(paymentDetails.payment_status).toLocaleDateString()}</td>
-                      </tr>
+                    <tr>
+                      <td className="font-semibold">Payment Status:</td>
+                      <td>{paymentDetails.payment_status}</td>
+                    </tr>
                   </tbody>
                 </table>
               ) : (
@@ -223,8 +234,9 @@ function NewBookings() {
               )}
             </div>
             <div className="px-6 py-4 bg-gray-100 border-t border-gray-200 flex justify-end">
-              <button className="btn btn-primary mr-2" onClick={approveBooking}>Approve Booking</button>
-              <button className="btn btn-secondary" onClick={closePopup}>Close</button>
+              <button className="btn btn-primary mr-2" onClick={approveBooking} disabled={updateIsLoading}>Approve Booking</button>
+              <button className="btn btn-secondary" onClick={rejectBooking} disabled={updateIsLoading}>Reject Booking</button>
+              {/* <button className="btn btn-secondary" onClick={closePopup}>Close</button> */}
             </div>
           </div>
         </div>
