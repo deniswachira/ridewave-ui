@@ -1,32 +1,32 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Home from './pages/Home.tsx'
-import Register from './pages/Register.tsx'
-import Contact from './pages/Contact.tsx'
-import Dashboard from './pages/Dashboard.tsx'
-import Error from './pages/Error.tsx'
-import Explore from './pages/Explore.tsx'
-import Login from './pages/Login.tsx'
-import UserBookings from './components/dashboard/UserBookings.tsx'
-import UserTickets from './components/dashboard/UserTickets.tsx'
-import UserProfiles from './components/adminDashboard/UserProfiles.tsx'
-import AdminDashboard from './pages/AdminDashboard.tsx'
-import Analytics from './components/adminDashboard/Analytics.tsx'
-import MyProfile from './components/dashboard/MyProfile.tsx'
-import CarDetailPage from './pages/CarDetailPage.tsx'
-import AllBookings from './components/adminDashboard/AllBookings.tsx'
-import NewBookings from './components/adminDashboard/NewBookings.tsx'
-import AllPayments from './components/adminDashboard/AllPayments.tsx'
-import AdminProfile from './components/adminDashboard/AdminProfile.tsx'
-import BookingDetails from './components/adminDashboard/BookingDetails.tsx'
-import AllTicket from './components/adminDashboard/AllTicket.tsx'
-import VehiclesSpecs from './components/adminDashboard/VehiclesSpecs.tsx'
-import AddSpecs from './components/adminDashboard/AddSpecs.tsx'
-import Upload from './pages/Upload.tsx'
-import Success from './pages/Success.tsx'
-import Failed from './pages/Failed.tsx'
-import Payment from './components/dashboard/Payment.tsx'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Home from './pages/Home';
+import Register from './pages/Register';
+import Contact from './pages/Contact';
+import Dashboard from './pages/Dashboard';
+import Error from './pages/Error';
+import Explore from './pages/Explore';
+import Login from './pages/Login';
+import UserBookings from './components/dashboard/UserBookings';
+import UserTickets from './components/dashboard/UserTickets';
+import UserProfiles from './components/adminDashboard/UserProfiles';
+import AdminDashboard from './pages/AdminDashboard';
+import Analytics from './components/adminDashboard/Analytics';
+import MyProfile from './components/dashboard/MyProfile';
+import CarDetailPage from './pages/CarDetailPage';
+import AllBookings from './components/adminDashboard/AllBookings';
+import NewBookings from './components/adminDashboard/NewBookings';
+import AllPayments from './components/adminDashboard/AllPayments';
+import AdminProfile from './components/adminDashboard/AdminProfile';
+import BookingDetails from './components/adminDashboard/BookingDetails';
+import AllTicket from './components/adminDashboard/AllTicket';
+import VehiclesSpecs from './components/adminDashboard/VehiclesSpecs';
+import AddSpecs from './components/adminDashboard/AddSpecs';
+import Upload from './pages/Upload';
+import Success from './pages/Success';
+import Failed from './pages/Failed';
+import Payment from './components/dashboard/Payment';
+import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute
 
-// const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 const router = createBrowserRouter([
   {
     path: '/',
@@ -74,7 +74,11 @@ const router = createBrowserRouter([
   },
   {
     path: 'dashboard/me',
-    element:  <Dashboard />,
+    element: (
+      <ProtectedRoute requiredRoles={['user']}>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
     errorElement: <Error />,
     children: [
       {
@@ -94,11 +98,14 @@ const router = createBrowserRouter([
         element: <UserTickets />,
       }
     ]
-
   },
   {
     path: 'dashboard/admin',
-    element: <AdminDashboard />,
+    element: (
+      <ProtectedRoute requiredRoles={['admin']}>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
     errorElement: <Error />,
     children: [
       {
@@ -117,14 +124,13 @@ const router = createBrowserRouter([
         path: "new-bookings",
         element: <NewBookings />,
       },
-     
       {
         path: "new-bookings/bookings-details/:booking_id",
         element: <BookingDetails />,
-      },      
+      },
       {
         path: "all-bookings",
-        element: <AllBookings />,       
+        element: <AllBookings />,
       },
       {
         path: "vehicle-specs",
@@ -133,7 +139,7 @@ const router = createBrowserRouter([
       {
         path: "vehicle-specs/add-vehicle-spec",
         element: <AddSpecs />,
-      },      
+      },
       {
         path: "payments",
         element: <AllPayments />,
@@ -142,20 +148,12 @@ const router = createBrowserRouter([
         path: "tickets",
         element: <AllTicket />,
       },
-      
     ]
-
   },
-
-  
-])
-
-
+]);
 
 function App() {
-
   return <RouterProvider router={router} />;
-
 }
 
-export default App
+export default App;
