@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { loadStripe } from '@stripe/stripe-js';
 import { useToast } from '../../components/ToastContext';
 import axios from "axios";
-import { apiCheckout } from "../../proxxy/proxxy";
+import {  apiDomain } from "../../proxxy/proxxy";
 const stripePromise = loadStripe('pk_test_51PYWkuRsls6dWz1RBvlMFpPhiI1J9szlUjGxpgAvIXsx2kiC9OWDvnWD6PsEwbUU6CTdw0FJ2O3b0Y6rSXAZ0hc200wJCewxdF'); 
 
 function UserBookings() {
@@ -66,7 +66,7 @@ function UserBookings() {
       
       const header = { 'Content-Type': 'application/json' };
 
-      const checkoutResponse = await axios.post(`${apiCheckout}/${booking_id}`, JSON.stringify(booking), {
+      const checkoutResponse = await axios.post(`${apiDomain}/create-checkout-session/${booking_id}`, JSON.stringify(booking), {
         headers: header,
       });
 

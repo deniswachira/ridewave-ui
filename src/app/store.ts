@@ -26,7 +26,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Add this line to avoid serialization errors with redux-persist
+      serializableCheck: false, //  to avoid serialization errors with redux-persist
     }).concat(userApi.middleware, carApi.middleware, bookingApi.middleware), // Don't forget to include the bookingApi middleware
 });
 

@@ -36,7 +36,7 @@ const Payment = () => {
 
   useEffect(() => {
     setDisplayedPayments(fetchedPayments);
-  }, [fetchedPayments]);
+  }, [fetchedPayments, user]);
 
 
 
