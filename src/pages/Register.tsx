@@ -14,14 +14,17 @@ export default function Register() {
     const { register, handleSubmit, formState: { errors } } = useForm<UserRegisterFormValues>();
     const navigate = useNavigate();
     const [registerUser, { isLoading }] = userApi.useRegisterUserMutation();
-    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { isAuthenticated, role} = useSelector((state: RootState) => state.auth);
     const { showToast } = useToast();
 
     useEffect(() => {
         if (isAuthenticated) {
+            if (role === 'admin') {
+                navigate('/dashboard/admin');
+            } else
             navigate('/dashboard/me');
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, navigate,role]);
 
     const onSubmit = async (data: UserRegisterFormValues) => {
         try {

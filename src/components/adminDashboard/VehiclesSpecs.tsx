@@ -73,7 +73,7 @@ const VehiclesSpecs: React.FC = () => {
                 await deleteCarSpec(vehicleSpec_id).unwrap();
                 showToast("Deleted Successfully", 'success');
             } catch (error: any) {
-                console.error('Error deleting vehicle Specification:', error.data.msg);
+               
                 showToast('Specification not deleted successfully! Please try again.', 'warning');
             }
         }

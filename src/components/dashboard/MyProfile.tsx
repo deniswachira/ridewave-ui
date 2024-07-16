@@ -17,10 +17,11 @@ interface FormValues {
 const MyProfile = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated, role } = useSelector((state: RootState) => state.auth);
   const [updateProfile, { isLoading }] = userApi.useUpdateUserProfileMutation();
-  let profilePicture = 'https://via.placeholder.com/150';
 
+  // Use a dynamic profile picture if available
+  const profilePicture = user?.user.profile_picture || 'https://via.placeholder.com/150';
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleModalToggle = () => {
@@ -30,10 +31,10 @@ const MyProfile = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else if (user?.user.role !== 'user') {
+    } else if (role !== 'admin') {
       navigate('/dashboard/me');
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, role, navigate]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
 

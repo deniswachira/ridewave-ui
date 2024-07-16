@@ -27,6 +27,7 @@ export type UserState ={
         phone_numbere: string;
     } | null;
     isAuthenticated: boolean;
+
     loading: boolean;
     error: string | null;
 }
@@ -40,6 +41,12 @@ export interface TUser {
     address: string;
     phone_number: string;
     role: string;
+}
+
+export interface AdminState {
+  token: null;
+  adminInfo: | UserLoginFormValues | any;
+  isAuthenticated: boolean;
 }
 
 export interface createBookingResponse {
@@ -78,6 +85,7 @@ export interface AuthState {
     user: null | UserRegisterFormValues | UserLoginFormValues | any;
     token: string | null;
     isAuthenticated: boolean;
+    role: string | null;
 }
 
 

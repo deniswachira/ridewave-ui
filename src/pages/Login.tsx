@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import {userApi} from '../features/api/userApiSlice';
+import { userApi } from '../features/api/userApiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -19,32 +19,28 @@ type FormValues = {
 
 export default function Login() {
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
-    const [loginUser, { isLoading  }] = userApi.useLoginUserMutation();
+    const [loginUser, { isLoading }] = userApi.useLoginUserMutation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { isAuthenticated, role } = useSelector((state: RootState) => state.auth);
     const { showToast } = useToast();
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/dashboard/me');
+            if (role === 'admin') {
+                navigate('/dashboard/admin');
+            } else {
+                navigate('/dashboard/me');
+            }
         }
-    }, [isAuthenticated, navigate]);
+    }, [role, navigate]);
 
     const onSubmit = async (data: FormValues) => {
         try {
             const user = await loginUser(data).unwrap();
-            dispatch(setCredentials({ user, token: user.token }));
-            if(user.role === 'admin') {
-                navigate('/dashboard/admin')
-
-            }else if(user.role === 'user'){
-                navigate('/dashboard/me')
-            }
-            else{
-                navigate('/')
-            };
-            showToast('Login successful!', 'success');
+            dispatch(setCredentials({ user, token: user.token, role: user.role }));
+                navigate('/');
+           showToast('Login successful!', 'success');
         } catch (err: any) {
             toast.error('Failed to login: ' + (err.data?.msg || err.msg || err.error || err));
         }

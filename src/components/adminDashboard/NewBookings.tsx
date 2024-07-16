@@ -26,8 +26,7 @@ function NewBookings() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null); // State to track selected booking for popup
   const [paymentDetails, setPaymentDetails] = useState<any>(null); // State to store payment details
   const [loadingPayment, setLoadingPayment] = useState(false); // Loading state for payment details
-  console.log(Allbookings);
-  useEffect(() => {
+   useEffect(() => {
     if (Allbookings.length > 0) {
       setBookings(Allbookings);
     }
