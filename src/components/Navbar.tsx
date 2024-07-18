@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../app/store";
 import { clearCredentials } from "../features/auth/authSlice";
-import { FaBars, FaHome, FaPhone, FaUser, FaSignInAlt, FaSignOutAlt, FaCar } from "react-icons/fa";
+import { FaBars, FaHome, FaUser, FaSignInAlt, FaSignOutAlt, FaCar } from "react-icons/fa";
 import logo from "../assets/logo.svg";
 import { ArrowBigDownDashIcon, GalleryHorizontal } from "lucide-react";
 import { useToast } from "../components/ToastContext";
