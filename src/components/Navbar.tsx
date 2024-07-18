@@ -4,7 +4,7 @@ import { RootState } from "../app/store";
 import { clearCredentials } from "../features/auth/authSlice";
 import { FaBars, FaHome, FaPhone, FaUser, FaSignInAlt, FaSignOutAlt, FaCar } from "react-icons/fa";
 import logo from "../assets/logo.svg";
-import { ArrowBigDownDashIcon } from "lucide-react";
+import { ArrowBigDownDashIcon, GalleryHorizontal } from "lucide-react";
 import { useToast } from "../components/ToastContext";
 
 const Navbar = () => {
@@ -43,9 +43,9 @@ const Navbar = () => {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/contact" className="flex items-center text-white hover:text-gray-300">
-                                <FaPhone className="mr-2 text-2xl text-green-600" />
-                                Contact Us
+                            <Link to="/gallery" className="flex items-center text-white hover:text-gray-300">
+                                <GalleryHorizontal className="mr-2 text-2xl text-green-600" />
+                                Gallery
                             </Link>
                         </li>
                     </ul>
@@ -69,9 +69,9 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/contact" className="flex items-center text-white hover:text-gray-300">
-                            <FaPhone className="text-xl text-green-600 mr-2" />
-                            Contact Us
+                        <Link to="/gallery" className="flex items-center text-white hover:text-gray-300">
+                            <GalleryHorizontal className="text-xl text-green-600 mr-2" />
+                            Gallery
                         </Link>
                     </li>
                 </ul>

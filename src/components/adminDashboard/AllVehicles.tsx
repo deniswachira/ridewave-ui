@@ -2,57 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { carApi } from '../../features/api/carApiSlice';
 import Swal from 'sweetalert2';
 import { useToast } from '../ToastContext';
-import { AddVehiclePayload } from '../../types/Types';
-import { SquarePlus, Trash, X } from 'lucide-react';
+import { AddVehiclePayload, Car } from '../../types/Types';
+import { Edit, Trash, X } from 'lucide-react';
 import AnimatedLoader from '../AnimatedLoader';
 
-export interface VehicleSpecs {
-    vehicleSpec_id: number;
-    vehicle_name: string;
-    vehicle_model: string;
-    vehicle_year: string;
-    fuel_type: string;
-    seating_capacity: number;
-    color: string;
-    engine_type: string;
-    vehicle_description: string;
-    features: string;
-    image1_url: string;
-    image2_url: string;
-    image3_url: string;
-}
-export interface Vehicle {
-    vehicle_id: number;
-    vehicleSpec_id: number;
-    rental_rate: number;
-    availability: string; 
-    vehicleSpec: VehicleSpecs;   
-}
-
 const AllVehicles: React.FC = () => {
-   
-    const {data: vehicles = [], isError,isLoading:vehicleIsloading} = carApi.useFetchCarsWithSpecsQuery({
+    const { data: vehicles = [], isError, isLoading: vehicleIsLoading } = carApi.useFetchCarsWithSpecsQuery({
         refetchOnMountOrArgChange: true,
         pollingInterval: 60000,
     });
-    const [addVehicle, { isLoading: isAddingVehicle }] = carApi.useAddVehicleMutation();
-    const [deleteCarSpec, ] = carApi.useDeleteVehicleSpecMutation();
+    const [updateVehicle, { isLoading: isUpdatingVehicle }] = carApi.useUpdateVehicleMutation();
+    const [deleteVehicle] = carApi.useDeleteVehicleMutation();
     const { showToast } = useToast();
-    const [vehiclesData, setVehiclesData] = useState<Vehicle[]>([]);
+    const [vehiclesData, setVehiclesData] = useState<Car[]>([]);
     const [page, setPage] = useState<number>(1);
     const specsPerPage: number = 5;
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
-    const [selectedVehicleSpecId, setSelectedVehicleSpecId] = useState<number | null>(null); // Selected vehicle spec ID
-    const [rentalRate, setRentalRate] = useState<number | ''>(''); // Rental rate state
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [selectedVehicle, setSelectedVehicle] = useState<Car | null>(null);
+    const [rentalRate, setRentalRate] = useState<number | ''>(0);
     const [availability, setAvailability] = useState<string>('Available');
 
     useEffect(() => {
         if (vehicles) {
             setVehiclesData(vehicles);
         }
-    }, [vehicles]); 
+    }, [vehicles]);
 
-    const handleDelete = async (vehicleSpec_id: number) => {
+    const handleDelete = async (vehicle_id: number) => {
         const result = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -65,11 +41,10 @@ const AllVehicles: React.FC = () => {
 
         if (result.isConfirmed) {
             try {
-                await deleteCarSpec(vehicleSpec_id).unwrap();
+                await deleteVehicle(vehicle_id).unwrap();
                 showToast("Deleted Successfully", 'success');
             } catch (error: any) {
-               
-                showToast('Specification not deleted successfully! Please try again.', 'warning');
+                showToast('Vehicle not deleted successfully! Please try again.', 'warning');
             }
         }
     };
@@ -78,33 +53,41 @@ const AllVehicles: React.FC = () => {
         setPage(newPage);
     };
 
-    const handleAddVehicle = async () => {
-        if (!rentalRate) {
+    const openEditModal = (vehicle: Car) => {
+        setSelectedVehicle(vehicle);
+        setRentalRate(Number(vehicle.rental_rate));
+        setAvailability(vehicle.availability);
+        setIsModalOpen(true);
+    };
+
+    const handleEditVehicle = async () => {
+        if (!rentalRate || !selectedVehicle) {
             showToast('Please enter the rental rate', 'warning');
             return;
         }
 
         try {
             const vehicleData: AddVehiclePayload = {
-                vehicleSpec_id: selectedVehicleSpecId ?? 0,
+                vehicleSpec_id: selectedVehicle.vehicleSpec_id,
                 rental_rate: rentalRate.toString(),
                 availability,
             };
 
-            await addVehicle(vehicleData).unwrap();
-            showToast('Vehicle added successfully!', 'success');
-            setIsModalOpen(false); // Close the modal after adding
-            setRentalRate(''); // Reset rental rate
+            await updateVehicle({ vehicle_id: selectedVehicle.vehicle_id, ...vehicleData }).unwrap();
+            showToast('Vehicle updated successfully!', 'success');
+            setIsModalOpen(false);
+            setRentalRate('');
+            setAvailability('Available');
         } catch (error: any) {
-            console.error('Error adding vehicle:', error);
-            showToast('Failed to add vehicle! Please try again.', 'error');
+            console.error('Error updating vehicle:', error);
+            showToast('Failed to update vehicle! Please try again.', 'error');
         }
     };
 
     const paginatedSpecs = vehiclesData.slice((page - 1) * specsPerPage, page * specsPerPage);
 
-    if (vehicleIsloading) {
-        return <div className="text-center"> <AnimatedLoader/> Loading Vehicles...</div>;
+    if (vehicleIsLoading) {
+        return <div className="text-center"> <AnimatedLoader /> Loading Vehicles...</div>;
     }
 
     if (isError) {
@@ -114,7 +97,6 @@ const AllVehicles: React.FC = () => {
     return (
         <div className="container mx-auto py-5 px-4">
             <h1 className="text-xl font-bold text-center">All Vehicles </h1>
-           
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
@@ -122,7 +104,7 @@ const AllVehicles: React.FC = () => {
                             <th>Vehicle ID</th>
                             <th>Vehicle Name</th>
                             <th>Rental rate</th>
-                            <th>Availability</th>                            
+                            <th>Availability</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -138,16 +120,12 @@ const AllVehicles: React.FC = () => {
                                     <td>{vehicle.vehicleSpec.vehicle_name}</td>
                                     <td>{vehicle.rental_rate}</td>
                                     <td>{vehicle.availability}</td>
-                                    
                                     <td>
                                         <button
                                             className="btn btn-info btn-outline mr-2"
-                                            onClick={() => {
-                                                setSelectedVehicleSpecId(vehicle.vehicle_id);
-                                                setIsModalOpen(true);
-                                            }}
+                                            onClick={() => openEditModal(vehicle)}
                                         >
-                                            <SquarePlus /> Edit Vehicle
+                                            <Edit /> Edit Vehicle
                                         </button>
                                         <button className="btn btn-error btn-outline" onClick={() => handleDelete(vehicle.vehicle_id)}> <Trash className="text-red-500" /> </button>
                                     </td>
@@ -176,10 +154,9 @@ const AllVehicles: React.FC = () => {
                 </div>
             </div>
 
-            {/* Daisy UI Modal */}
             <dialog id="my_modal_5" className={`modal modal-bottom sm:modal-middle ${isModalOpen ? 'modal-open' : ''}`}>
                 <div className="modal-box">
-                    <h3 className="font-bold text-lg">Add Vehicle</h3>
+                    <h3 className="font-bold text-lg">Edit Vehicle</h3>
                     <div className="mt-4">
                         <label className="label">
                             <span className="label-text">Rental Rate</span>
@@ -206,14 +183,13 @@ const AllVehicles: React.FC = () => {
                         </select>
                     </div>
                     <div className="modal-action">
-                        <button className="btn btn-outline btn-info" onClick={handleAddVehicle} disabled={isAddingVehicle}>
-                            {isAddingVehicle ? 'Adding...' : <SquarePlus /> } Add Vehicle
+                        <button className="btn btn-outline btn-info" onClick={handleEditVehicle} disabled={isUpdatingVehicle}>
+                            {isUpdatingVehicle ? 'Updating...' : <Edit />} Update Vehicle
                         </button>
                         <button className="btn btn-outline" onClick={() => setIsModalOpen(false)}><X /></button>
                     </div>
                 </div>
             </dialog>
-
         </div>
     );
 };

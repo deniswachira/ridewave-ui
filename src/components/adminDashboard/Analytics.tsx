@@ -1,114 +1,168 @@
-import { useEffect, useState } from "react";
-import { Line, Bar, Pie } from "react-chartjs-2";
-import { Booking, Revenue, BookingStatus } from "../../types/Types";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, ArcElement } from 'chart.js';
-import 'chart.js/auto';
+import { bookingApi } from "../../features/api/bookingApiSlice";
+import { userApi } from "../../features/api/userApiSlice";
+import { carApi } from '../../features/api/carApiSlice';
+import { paymentApi } from '../../features/api/paymentApiSlice';
+import { FaUsers, FaCar, FaDollarSign, FaTicketAlt } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import AnimatedLoader from "../AnimatedLoader";
 
-// Register the components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, ArcElement);
-
-const dummyBookingData: Booking[] = [
-  { date: '2024-01-01', count: 5 },
-  { date: '2024-02-01', count: 10 },
-  { date: '2024-03-01', count: 15 },
-  // Add more data as needed
-];
-
-const dummyRevenueData: Revenue[] = [
-  { month: 'January', amount: 1000 },
-  { month: 'February', amount: 1500 },
-  { month: 'March', amount: 2000 },
-  // Add more data as needed
-];
-
-const dummyBookingStatusData: BookingStatus[] = [
-  { status: 'approved', count: 60 },
-  { status: 'pending', count: 30 },
-  { status: 'rejected', count: 10 },
-  // Add more data as needed
-];
+const cardVariants = {
+  hover: {
+    scale: 1.05,
+    transition: { type: "spring", stiffness: 300 },
+  },
+  tap: { scale: 0.95 },
+  loading: {
+    opacity: 0.5,
+    transition: { duration: 0.5 },
+  },
+};
 
 function Analytics() {
-  const [bookingData, setBookingData] = useState<Booking[]>([]);
-  const [revenueData, setRevenueData] = useState<Revenue[]>([]);
-  const [bookingStatusData, setBookingStatusData] = useState<BookingStatus[]>([]);
+  const { data: bookingsData = [], isLoading: bookingsLoading } = bookingApi.useFetchBookingsQuery(1, {
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 60000,
+  });
 
-  useEffect(() => {
-    setBookingData(dummyBookingData);
-    setRevenueData(dummyRevenueData);
-    setBookingStatusData(dummyBookingStatusData);
-  }, []);
+  const { data: usersProfile, isLoading: usersLoading } = userApi.useGetUsersProfilesQuery(1, {
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 120000,
+  });
 
-  const lineChartData = {
-    labels: bookingData.map(data => data.date),
-    datasets: [
-      {
-        label: 'Bookings Over Time',
-        data: bookingData.map(data => data.count),
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      },
-    ],
-  };
+  const { data: vehiclesData = [], isLoading: vehiclesLoading } = carApi.useFetchCarsWithSpecsQuery(1, {
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 120000,
+  });
 
-  const barChartData = {
-    labels: revenueData.map(data => data.month),
-    datasets: [
-      {
-        label: 'Revenue Per Month',
-        data: revenueData.map(data => data.amount),
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+  const { data: paymentsData = [], isLoading: paymentsLoading } = paymentApi.useGetPaymentsQuery(1, {
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 120000,
+  });
 
-  const pieChartData = {
-    labels: bookingStatusData.map(data => data.status),
-    datasets: [
-      {
-        label: 'Booking Status Distribution',
-        data: bookingStatusData.map(data => data.count),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
+  const confirmedBookings: number = bookingsData.filter((booking: { booking_status: string; }) => booking.booking_status === 'approved').length;
+  const pendingBookings: number = bookingsData.filter((booking: { booking_status: string; }) => booking.booking_status === 'pending' || booking.booking_status === 'rejected').length;
+  const confirmedPayments: number = paymentsData.filter((payment: { payment_status :string}) => payment.payment_status === 'paid').length;
+  const pendingPayments: number = paymentsData.filter((payment: { payment_status: string }) => payment.payment_status === 'pending' || payment.payment_status === "failed").length;
 
+  const usersCount:number = usersProfile?.length || 0;
+  const vehiclesCount:number = vehiclesData.length;
+
+  const availableVehicles: number = vehiclesData.filter((vehicle: { availability: string }) => vehicle.availability === 'Available').length;
+  const notAvailableVehicles: number = vehiclesData.filter((vehicle: { availability: string }) => vehicle.availability === 'Not Available').length;
+
+  const totalRevenue: number = paymentsData
+    .filter((payment: { payment_status: string; }) => payment.payment_status === 'paid')
+    .reduce((sum: number, payment: { payment_amount: string | number }) => sum + Number(payment.payment_amount), 0);
   return (
-    <div className="container mx-auto py-12 px-4">
-      {/* <h1 className="text-4xl font-bold text-center mb-8">Analytics 😊😊😊</h1> */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="card w-full bg-gray-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Bookings Over Time</h2>
-            <Line data={lineChartData} />
+    <>
+      <div className="container mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          className={`card bg-blue-500 text-white p-6 rounded-lg shadow-lg flex flex-col items-center ${bookingsLoading ? "opacity-50" : ""}`}
+          variants={cardVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          {bookingsLoading ? (
+            <AnimatedLoader />
+          ) : (
+            <>
+              <FaUsers size={40} />
+              <h2 className="text-2xl font-bold mt-4">Users</h2>
+              <p className="text-lg mt-2">{usersCount}</p>
+            </>
+          )}
+        </motion.div>
+
+        <motion.div
+          className={`card bg-green-500 text-white p-6 rounded-lg shadow-lg flex flex-col items-center ${usersLoading ? "opacity-50" : ""}`}
+          variants={cardVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          {vehiclesLoading ? (
+            <AnimatedLoader />
+          ) : (
+            <>
+              <FaCar size={40} />
+              <h2 className="text-2xl font-bold mt-4">Vehicles</h2>
+              <p className="text-lg mt-2">{vehiclesCount}</p>
+            </>
+          )}
+        </motion.div>
+
+        <motion.div
+          className={`card bg-yellow-500 text-white p-6 rounded-lg shadow-lg flex flex-col items-center ${paymentsLoading ? "opacity-50" : ""}`}
+          variants={cardVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          {paymentsLoading ? (
+            <AnimatedLoader />
+          ) : (
+            <>
+              <FaDollarSign size={40} />
+              <h2 className="text-2xl font-bold mt-4">Revenue</h2>
+              <p className="text-lg mt-2">Ksh {totalRevenue.toLocaleString()}</p>
+            </>
+          )}
+        </motion.div>
+
+        <motion.div
+          className={`card bg-red-500 text-white p-6 rounded-lg shadow-lg flex flex-col items-center ${bookingsLoading ? "opacity-50" : ""}`}
+          variants={cardVariants}
+          whileHover="hover"
+          whileTap="tap"
+        >
+          {bookingsLoading ? (
+            <AnimatedLoader />
+          ) : (
+            <>
+              <FaTicketAlt size={40} />
+              <h2 className="text-2xl font-bold mt-4">Bookings</h2>
+              <p className="text-lg mt-2">{confirmedBookings + pendingBookings}</p>
+            </>
+          )}
+        </motion.div>
+      </div>
+
+      <div className="container mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
+          <h2 className="text-xl font-semibold mb-4">Bookings Overview</h2>
+          <div className="flex items-center justify-between w-full">
+            <div className="text-4xl font-bold text-green-600">{confirmedBookings}</div>
+            <span className="text-gray-600">Confirmed</span>
+          </div>
+          <div className="flex items-center justify-between w-full mt-2">
+            <div className="text-4xl font-bold text-yellow-600">{pendingBookings}</div>
+            <span className="text-gray-600">Pending</span>
           </div>
         </div>
-        <div className="card w-full bg-gray-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Revenue Per Month</h2>
-            <Bar data={barChartData} />
+
+        <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
+          <h2 className="text-xl font-semibold mb-4">Payments Overview</h2>
+          <div className="flex items-center justify-between w-full">
+            <div className="text-4xl font-bold text-green-600">{confirmedPayments}</div>
+            <span className="text-gray-600">Confirmed</span>
+          </div>
+          <div className="flex items-center justify-between w-full mt-2">
+            <div className="text-4xl font-bold text-yellow-600">{pendingPayments}</div>
+            <span className="text-gray-600">Pending</span>
           </div>
         </div>
-        <div className="card w-full bg-gray-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Booking Status Distribution</h2>
-            <Pie data={pieChartData} />
+
+        <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
+          <h2 className="text-xl font-semibold mb-4">Vehicles Status</h2>
+          <div className="flex items-center justify-between w-full">
+            <div className="text-4xl font-bold text-green-600">{availableVehicles}</div>
+            <span className="text-gray-600">Available Vehicles</span>
+          </div>
+          <div className="flex items-center justify-between w-full mt-2">
+            <div className="text-4xl font-bold text-red-600">{notAvailableVehicles}</div>
+            <span className="text-gray-600">Not Available</span>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -9,6 +9,10 @@ export const paymentApi = createApi({
       query: () => 'payments',
       providesTags: ['payments'],
     }),
+    listPayments: builder.query({
+      query: () => 'all-payments',
+      providesTags: ['payments'],
+    }),
     getPaymentByBookingId: builder.query({
         query: (booking_id) => `payment-by-booking-id/${booking_id}`,
         providesTags: ['payments'],

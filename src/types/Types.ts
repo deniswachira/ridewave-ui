@@ -143,3 +143,10 @@ export interface BookingStatus {
   status: string;
   count: number;
 }
+
+export interface vehicleUpdatePayload {
+  vehicle_id: number;
+  vehicleSpec_id: number;
+  rental_rate: string;
+  availability: string;
+}

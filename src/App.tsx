@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './pages/Home';
 import Register from './pages/Register';
-import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
 import Error from './pages/Error';
 import Explore from './pages/Explore';
@@ -27,6 +26,7 @@ import Failed from './pages/Failed';
 import Payment from './components/dashboard/Payment';
 import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute
 import AllVehicles from './components/adminDashboard/AllVehicles';
+import Gallery from './pages/Gallery';
 
 const router = createBrowserRouter([
   {
@@ -64,8 +64,8 @@ const router = createBrowserRouter([
     errorElement: <Error />,
   },
   {
-    path: 'contact',
-    element: <Contact />,
+    path: 'gallery',
+    element: <Gallery />,
     errorElement: <Error />,
   },
   {

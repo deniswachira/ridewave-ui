@@ -1,6 +1,6 @@
 import { apiDomain } from '../../proxxy/proxxy';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { AddSpecsFormValues, AddVehiclePayload } from '../../types/Types';
+import { AddSpecsFormValues, AddVehiclePayload, vehicleUpdatePayload } from '../../types/Types';
 // import { FetchCarsWithSpecsResponse } from '../../types/Types';
 
 export const carApi = createApi({
@@ -24,11 +24,11 @@ export const carApi = createApi({
       }),
       invalidatesTags: ["fetchCarsWithSpecs"] 
     }),
-    updateCar: builder.mutation<void, { id: number, make: string, model: string, year: number }>({
-      query: ({ id, make, model, year }) => ({
-        url: `vehicles/${id}`,
+    updateVehicle: builder.mutation<vehicleUpdatePayload, Partial<vehicleUpdatePayload>>({
+      query: ({ vehicle_id, ...patch}) => ({
+        url: `vehicles/${vehicle_id}`,
         method: 'PUT',
-        body: { make, model, year },
+        body: patch,
       }),
       invalidatesTags: ["fetchCarsWithSpecs"] 
     }),
