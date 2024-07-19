@@ -20,24 +20,19 @@ import BookingDetails from './components/adminDashboard/BookingDetails';
 import AllTicket from './components/adminDashboard/AllTicket';
 import VehiclesSpecs from './components/adminDashboard/VehiclesSpecs';
 import AddSpecs from './components/adminDashboard/AddSpecs';
-import Upload from './pages/Upload';
 import Success from './pages/Success';
 import Failed from './pages/Failed';
 import Payment from './components/dashboard/Payment';
-import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute
+import ProtectedRoute from './components/ProtectedRoute'; 
 import AllVehicles from './components/adminDashboard/AllVehicles';
-import Gallery from './pages/Gallery';
+import HowItWorks from './pages/HowItWorks';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
     errorElement: <Error />,
-  },
-  {
-    path: "upload",
-    element: <Upload />,
-  },
+  },  
   {
     path: 'explore',
     element: <Explore />,
@@ -64,8 +59,8 @@ const router = createBrowserRouter([
     errorElement: <Error />,
   },
   {
-    path: 'gallery',
-    element: <Gallery />,
+    path: 'how-it-works',
+    element: <HowItWorks />,
     errorElement: <Error />,
   },
   {

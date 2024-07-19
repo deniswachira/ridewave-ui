@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CarCard from './CarCard';
 import { Car } from '../types/Types';
+import { Link } from 'react-router-dom';
 
 
 interface CarCardsSectionProps {
@@ -31,7 +32,7 @@ const CarCardsSection: React.FC<CarCardsSectionProps> = ({ cars }) => {
             </div>
             <div className="flex justify-center mt-8">
                 <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none">
-                    Explore More
+                    <Link to="explore">Explore</Link>
                 </button>
             </div>
         </div>

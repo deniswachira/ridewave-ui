@@ -116,6 +116,7 @@ const AddSpecs = () => {
                             <option value="Toyota">Toyota</option>
                             <option value="Mazida">Mazda</option>
                             <option value="Honda">Honda</option>
+                            <option value="Mercedes">Mercedes</option>
                         </select>
                         {errors.vehicle_name && <span className="text-red-600"> vehicle_name is required</span>}
                     </div>
@@ -132,6 +133,10 @@ const AddSpecs = () => {
                             <option value="Accord">Honda(Accord)</option>
                             <option value="Civic">Honda(Civic)</option>
                             <option value="CR-V">Honda(CR-V)</option>
+                            <option value="A-Class">Mercedes(A-Class)</option>
+                            <option value="G-Class">Mercedes(G-Wagon)</option>
+                            <option value="EQC">Mercedes(E-EQC)</option>
+
                         </select>
                             {errors.vehicle_model && <span className="text-red-600"> vehicle_model is required</span>}
                     </div>

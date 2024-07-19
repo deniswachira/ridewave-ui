@@ -2,10 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../app/store";
 import { clearCredentials } from "../features/auth/authSlice";
-import { FaBars, FaHome, FaUser, FaSignInAlt, FaSignOutAlt, FaCar } from "react-icons/fa";
+import { FaBars, FaHome, FaSignInAlt, FaSignOutAlt, FaCar } from "react-icons/fa";
 import logo from "../assets/logo.svg";
-import { ArrowBigDownDashIcon, GalleryHorizontal } from "lucide-react";
+import {  GalleryHorizontal } from "lucide-react";
 import { useToast } from "../components/ToastContext";
+import { GrDashboard } from "react-icons/gr";
 
 const Navbar = () => {
     const dispatch = useDispatch();
@@ -69,9 +70,9 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/gallery" className="flex items-center text-white hover:text-gray-300">
+                        <Link to="/how-it-works" className="flex items-center text-white hover:text-gray-300">
                             <GalleryHorizontal className="text-xl text-green-600 mr-2" />
-                            Gallery
+                            HowIt Works
                         </Link>
                     </li>
                 </ul>
@@ -89,7 +90,14 @@ const Navbar = () => {
                                 <span className="text-green-400">Hey, </span>
                                 {user?.user.full_name}
                             </span>
-                            <ArrowBigDownDashIcon className="text-xl" />
+                                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                                    <div className="w-10 rounded-full">
+                                        <img
+                                            alt="profile"
+                                            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                                    </div>
+                                </div>
+
                         </button>
                         <ul className="dropdown-content bg-gray-900 rounded-box z-[1] mt-3 w-52 p-2 shadow">
                             <li>
@@ -97,8 +105,8 @@ const Navbar = () => {
                                     to={role === 'admin' ? '/dashboard/admin' : '/dashboard/me'}
                                     className="flex items-center text-white hover:text-gray-300 mb-2"
                                 >
-                                    <FaUser className="mr-3 text-xl text-green-600" />
-                                    Profile
+                                    <GrDashboard className="mr-3 text-xl text-green-600" />
+                                    Dashboard
                                 </Link>
                             </li>
                             <li>

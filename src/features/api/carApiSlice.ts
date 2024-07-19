@@ -37,7 +37,7 @@ export const carApi = createApi({
         url: `vehicles-spec/${vehicleSpec_id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ["fetchCarsWithSpecs"] 
+      invalidatesTags: ["fetchCarsWithSpecs", "fetchCarSpecs"] 
     }),
     deleteVehicle: builder.mutation({
       query: (vehicle_id) => ({
@@ -52,18 +52,19 @@ export const carApi = createApi({
         method: 'POST',
         body: addSpecsPayload,
       }),
+      invalidatesTags: ["fetchCarSpecs"]
     }),
     getCarSpecs: builder.query({
       query: () => 'vehicles-spec',
       providesTags: ["fetchCarSpecs"]
     }),
-    deleteCarSpec: builder.mutation<void, number>({
-      query: (id) => ({
-        url: `vehicles-spec/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ["fetchCarSpecs"] 
-    }),
+    // deleteCarSpec: builder.mutation<void, number>({
+    //   query: (id) => ({
+    //     url: `vehicles-spec/${id}`,
+    //     method: 'DELETE',
+    //   }),
+    //   invalidatesTags: ["fetchCarSpecs"] 
+    // }),
   }),
   
 });

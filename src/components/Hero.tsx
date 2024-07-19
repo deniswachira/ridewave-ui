@@ -8,7 +8,6 @@ import heroImg4 from '../assets/background/img1.jpg';
 import { Link } from 'react-router-dom';
 
 function Hero() {
-  // Split the text into parts for dynamic rendering
   const textParts = [
     { text: 'Drive the ', className: 'text-green-600', style: { transition: 'color 0.3s' } },
     { text: 'Car ', className: 'text-blue-600', style: { transition: 'color 0.3s' } },
