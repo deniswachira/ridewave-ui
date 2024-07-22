@@ -1,4 +1,6 @@
 import bmw from "../assets/logos/bmw.png"
+import toyota from "../assets/logos/toyota.png"
+import mazda from "../assets/logos/mazda.png"
 
 export default function Companies() {
     return (
@@ -9,13 +11,13 @@ export default function Companies() {
                     <img src={bmw} width= "100px"  alt=""  />
                 </div>
                 <div className="text-gray-600 dark:text-gray-600 hover:animate-bounce transition hover:delay-300">
-                    <img src={bmw} width="100px" alt="" />
+                    <img src={toyota} width={200} height={200} alt="" />
                 </div>
                 <div className="text-gray-600 dark:text-gray-600 hover:motion-safe:animate-spin transition hover:delay-300">
                     <img src={bmw} width="100px" alt="" />
                 </div>
                 <div className="text-gray-600 dark:text-gray-600 hover:animate-bounce transition hover:delay-300">
-                    <img src={bmw} width="100px" alt="" />
+                    <img src={mazda} width={180} alt="" />
                 </div>
                 <div className="text-gray-600 dark:text-gray-600 hover:animate-pulse transition hover:delay-300">
                     <img src={bmw} width="100px" alt="" />

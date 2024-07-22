@@ -17,7 +17,7 @@ export default function AdminSideNav() {
                         <span className="text-blue-600 font-bold">Users</span>
                     </summary>
                     <ul>
-                        <li><Link to="all-user-profiles ">Users Profiles</Link></li>
+                        <li><Link to="all-user-profiles">Users Profiles</Link></li>
                     </ul>
                 </details>
             </li>

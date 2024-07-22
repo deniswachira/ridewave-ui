@@ -24,6 +24,10 @@ export const userApi = createApi({
         body: userRegisterPayload,
       }),
     }),
+    getUserById: builder.query({
+      query: (user_id: number) => `users/${user_id}`,
+      providesTags: ["user",]
+    }),
     getUsersProfiles: builder.query({
       query: () => 'users',
       providesTags: ["users"]
@@ -38,8 +42,16 @@ export const userApi = createApi({
         method: 'PUT',
         body: patch,
       }),
-      invalidatesTags: ["user"]
+      invalidatesTags: ["user", "users"]
     }),
+  updateUserProfileImage: builder.mutation({
+    query: ({ user_id, profile_picture }) => ({
+      url: `users/${user_id}`,
+      method: 'PUT',
+      body: { profile_picture },
+    }),
+    invalidatesTags: ["user", "users"]
+  }),
     deleteUserProfile: builder.mutation({
       query: (user_id) => ({
         url: `users/${user_id}`,

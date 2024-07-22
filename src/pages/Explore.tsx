@@ -146,10 +146,9 @@ function Explore() {
                                     animation: `fadein 0.5s ${index * 0.1}s both, slideup 0.5s ${index * 0.1}s both`
                                 }}
                             >
-                                <img src={image} alt={`${car.vehicleSpec.vehicle_name} ${car.vehicleSpec.vehicle_model}`} className="w-full h-40 object-cover" />
+                                <img src={car.vehicleSpec.image1_url || image} alt={`${car.vehicleSpec.vehicle_name} ${car.vehicleSpec.vehicle_model}`} className="w-full h-40 object-cover" />
                                 <div className="p-4">
                                     <h2 className="text-xl font-bold mb-2">{car.vehicleSpec.vehicle_name} {car.vehicleSpec.vehicle_model}</h2>
-                                    {/* <p className="text-gray-400 mb-4">{car.vehicleSpec.vehicle_description}</p> */}
                                     <div className="flex justify-between mb-2">
                                         <div className="flex flex-col items-center">
                                             <Users className="w-5 h-5 text-green-400 mb-1" />

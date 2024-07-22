@@ -7,12 +7,15 @@ import logo from "../assets/logo.svg";
 import {  GalleryHorizontal } from "lucide-react";
 import { useToast } from "../components/ToastContext";
 import { GrDashboard } from "react-icons/gr";
+import { userApi } from "../features/api/userApiSlice";
 
 const Navbar = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated, role } = useSelector((state: RootState) => state.auth);
     const { showToast } = useToast();
+    const{data:userData} = userApi.useGetUserByIdQuery(user?.user.user_id);
+    const profilePicture = user?.user.profile_picture || 'https://via.placeholder.com/150';
 
     const handleLogout = () => {
         dispatch(clearCredentials());
@@ -88,13 +91,13 @@ const Navbar = () => {
                         <button className="btn btn-ghost flex items-center text-white">
                             <span className="mr-2">
                                 <span className="text-green-400">Hey, </span>
-                                {user?.user.full_name}
+                                {userData?.full_name}
                             </span>
                                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                                     <div className="w-10 rounded-full">
                                         <img
                                             alt="profile"
-                                            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                                            src={userData?.profile_picture || profilePicture} />
                                     </div>
                                 </div>
 

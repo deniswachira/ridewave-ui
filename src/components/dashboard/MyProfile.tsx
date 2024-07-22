@@ -1,26 +1,31 @@
 import { useEffect, useState } from 'react';
-import { FaEdit, FaTimes, FaTrophy, FaHistory, FaHeart } from 'react-icons/fa';
+import { FaCamera, FaEdit, FaTimes } from 'react-icons/fa';
 import { useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { userApi } from '../../features/api/userApiSlice';
 import { useToast } from '../../components/ToastContext';
+import axios from 'axios';
 
 interface FormValues {
   full_name: string;
   email: string;
-  phone: string;
+  phone_number: string;
   address: string;
 }
 
 const MyProfile = () => {
+  const preset_key = "orcuzpnl";
+  const cloud_name = "dosid37ll";
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user, isAuthenticated, role } = useSelector((state: RootState) => state.auth);
   const [updateProfile, { isLoading }] = userApi.useUpdateUserProfileMutation();
+  const [updateProfilePicture] = userApi.useUpdateUserProfileImageMutation();
+  const [imageProfile, setImageProfile] = useState<string>("");
+  const { data: userData } = userApi.useGetUserByIdQuery(user?.user.user_id);
 
-  // Use a dynamic profile picture if available
   const profilePicture = user?.user.profile_picture || 'https://via.placeholder.com/150';
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -39,28 +44,67 @@ const MyProfile = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    console.log("Data to update", data);
     try {
       await updateProfile({ ...data, user_id: user?.user.user_id }).unwrap();
       showToast('Profile updated successfully!', 'success');
       handleModalToggle();
     } catch (error) {
       showToast('Failed to update profile. Please try again.', 'error');
+      console.log(error);
     }
   };
 
+  const handleFileChange = async (e: any) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", preset_key);
+    try {
+      const res = await axios(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+        method: "POST",
+        data: formData
+      });
+      const data = await res.data;
+      setImageProfile(data.secure_url);
+      console.log(data.secure_url);
+    } catch (err: any) {
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    const updateProfilePic = async () => {
+      if (imageProfile) {
+        try {
+          await updateProfilePicture({ user_id: user?.user.user_id, profile_picture: imageProfile }).unwrap();
+          showToast('Profile picture updated successfully!', 'success');
+        } catch (error) {
+          showToast('Failed to update profile picture. Please try again.', 'error');
+        }
+      }
+    };
+
+    updateProfilePic();
+  }, [imageProfile, updateProfilePicture, showToast, user]);
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-10 px-5">
+    <div className="min-h-screen text-white py-10 px-5">
       <div className="max-w-4xl mx-auto rounded-lg shadow-lg p-5">
         <div className="flex flex-col md:flex-row items-center justify-between border-b border-gray-700 pb-5 mb-5">
-          <div className="flex items-center gap-4 mb-4 md:mb-0">
+          <div className="relative flex items-center gap-4 mb-4 md:mb-0">
             <img
-              src={profilePicture}
+              src={userData?.profile_picture || profilePicture}
               alt="Profile"
               className="w-24 h-24 rounded-full border-4 border-green-500"
             />
+            <label className="absolute bottom-0 bg-green-500 p-2 rounded-full cursor-pointer">
+              <FaCamera />
+              <input type="file" className="hidden" onChange={handleFileChange} />
+            </label>
             <div>
-              <h2 className="text-3xl font-bold">{user?.user.full_name}</h2>
-              <p className="text-gray-400">{user?.user.email}</p>
+              <h2 className="text-3xl font-bold">{userData?.full_name}</h2>
+              <p className="text-gray-400">{userData?.email}</p>
             </div>
           </div>
           <button
@@ -75,32 +119,11 @@ const MyProfile = () => {
           <div className="bg-gray-700 rounded-lg p-4">
             <h3 className="text-2xl font-bold mb-3">Personal Information</h3>
             <p className="mb-2">
-              <span className="font-bold">Phone:</span> {user?.user.phone_number}
+              <span className="font-bold">Phone:</span> {userData?.phone_number}
             </p>
             <p className="mb-2">
-              <span className="font-bold">Address:</span> {user?.user.address}
+              <span className="font-bold">Address:</span> {userData?.address}
             </p>
-          </div>
-
-          <div className="bg-gray-700 rounded-lg p-4">
-            <h3 className="text-2xl font-bold mb-3">User Statistics</h3>
-            <p className="mb-2">
-              <FaTrophy className="inline-block mr-2" /> Membership Level: Gold
-            </p>
-            <p className="mb-2">
-              <FaHistory className="inline-block mr-2" /> Total Bookings: 12
-            </p>
-            <p className="mb-2">
-              <FaHeart className="inline-block mr-2" /> Favorite Cars: 3
-            </p>
-          </div>
-
-          <div className="bg-gray-700 rounded-lg p-4 md:col-span-2">
-            <h3 className="text-2xl font-bold mb-3">Booking History</h3>
-            <ul className="list-disc list-inside text-gray-400">
-              <li>2024-07-01 - Toyota Camry (Completed)</li>
-              <li>2024-06-15 - Ford F-150 (Completed)</li>
-            </ul>
           </div>
         </div>
       </div>
@@ -121,7 +144,7 @@ const MyProfile = () => {
                   type="text"
                   id="fullName"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
-                  defaultValue={user?.user.full_name}
+                  defaultValue={userData?.full_name}
                   {...register('full_name', { required: 'Full Name is required' })}
                 />
                 {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name.message}</p>}
@@ -132,7 +155,7 @@ const MyProfile = () => {
                   type="email"
                   id="email"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
-                  defaultValue={user?.user.email}
+                  defaultValue={userData?.email}
                   {...register('email', { required: 'Email is required' })}
                 />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
@@ -143,10 +166,10 @@ const MyProfile = () => {
                   type="text"
                   id="phone"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
-                  defaultValue={user?.user.phone_number}
-                  {...register('phone', { required: 'Phone number is required' })}
+                  defaultValue={userData?.phone_number}
+                  {...register('phone_number', { required: 'Phone number is required' })}
                 />
-                {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
+                {errors.phone_number && <p className="text-red-500 text-sm">{errors.phone_number.message}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-300">Address</label>
@@ -154,7 +177,7 @@ const MyProfile = () => {
                   type="text"
                   id="address"
                   className="input input-bordered w-full bg-gray-900 border-gray-600 text-white"
-                  defaultValue={user?.user.address}
+                  defaultValue={userData?.address}
                   {...register('address', { required: 'Address is required' })}
                 />
                 {errors.address && <p className="text-red-500 text-sm">{errors.address.message}</p>}
