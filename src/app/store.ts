@@ -6,6 +6,7 @@ import {bookingApi}  from '../features/api/bookingApiSlice';
 import { paymentApi } from '../features/api/paymentApiSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import {ticketApi} from '../features/api/ticketApiSlice';
 
 // Create a persist config for the auth slice
 const authPersistConfig = {
@@ -32,13 +33,14 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [carApi.reducerPath]: carApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
+    [ticketApi.reducerPath]: ticketApi.reducer,
     [bookingApi.reducerPath]: persistedBookingReducer, // Use the persisted reducer here
     auth: persistedAuthReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false, // To avoid serialization errors with redux-persist
-    }).concat(userApi.middleware, carApi.middleware, bookingApi.middleware,paymentApi.middleware), // Include the bookingApi middleware
+    }).concat(userApi.middleware, ticketApi.middleware, carApi.middleware, bookingApi.middleware,paymentApi.middleware), // Include the bookingApi middleware
 });
 
 // Export the persisted store

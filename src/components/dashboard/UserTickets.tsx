@@ -1,137 +1,253 @@
-import { useState, useEffect } from "react";
-// import { useSelector } from "react-redux";
-// import { RootState } from "../../app/store";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useToast } from '../../components/ToastContext';
+import { ticketApi } from "../../features/api/ticketApiSlice";
+import { RootState } from "../../app/store";
+import { useSelector } from "react-redux";
+import { SquarePlus, Trash } from "lucide-react";
+import Swal from "sweetalert2";
 
-const dummyTickets = [
-  {
-    ticket_id: 1,
-    date: new Date().toISOString(),
-    subject: "Issue with booking",
-    status: 'open',
-    message: "I am facing an issue with my recent booking. Please assist."
-  },
-  {
-    ticket_id: 2,
-    date: new Date().toISOString(),
-    subject: "Payment failed",
-    status: 'closed',
-    message: "My payment failed during the booking process."
-  },
-  {
-    ticket_id: 3,
-    date: new Date().toISOString(),
-    subject: "Inquiry about vehicle availability",
-    status: 'pending',
-    message: "Is the vehicle with ID 123 available for the next weekend?"
-  },
-  // Add more dummy tickets as needed
-];
+interface Ticket {
+  ticket_id: number;
+  user_id: number;
+  subject: string;
+  message: string;
+  status: string;
+}
 
 function UserTickets() {
-  // const { user } = useSelector((state: RootState) => state.auth);
+  const { register, handleSubmit, reset } = useForm();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const user_id = user?.user.user_id;
   const { showToast } = useToast();
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editForm, setEditForm] = useState({ subject: '', message: '' });
 
-  const [page, setPage] = useState(1);
-  const [displayedTickets, setDisplayedTickets] = useState(dummyTickets);
-  const [newTicket, setNewTicket] = useState({ subject: '', message: '' });
-  const ticketsPerPage = 8;
+  const { data: UserTickets, isError, isLoading } = ticketApi.useGetAllTicketsByUserIdQuery(user_id);
+  const [addTicket] = ticketApi.useAddTicketMutation();
+  const [updateTicket] = ticketApi.useUpdateTicketMutation();
+  const [deleteTicket] = ticketApi.useDeleteTicketMutation();
 
   useEffect(() => {
-    setDisplayedTickets(dummyTickets);
-  }, []);
+    if (isError) {
+      showToast('Failed to load tickets', 'error');
+    }
+  }, [isError, showToast]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  useEffect(() => {
+    if (selectedTicketId !== null && UserTickets) {
+      const ticket = UserTickets.find((ticket: Ticket) => ticket.ticket_id === selectedTicketId);
+      if (ticket) {
+        setEditForm({ subject: ticket.subject, message: ticket.message });
+      }
+    }
+  }, [selectedTicketId, UserTickets]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewTicket(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      reset();
+    }
+  }, [isCreateModalOpen, reset]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const newTicketData = {
-      ticket_id: displayedTickets.length + 1,
-      date: new Date().toISOString(),
-      subject: newTicket.subject,
-      status: 'open',
-      message: newTicket.message
+  const handleEditTicket = async (event: any) => {
+    event.preventDefault();
+    if (selectedTicketId === null) return;
+    const ticket = {
+      ...editForm,
+      ticket_id: selectedTicketId,
+      user_id: user_id
     };
-    setDisplayedTickets(prevTickets => [newTicketData, ...prevTickets]);
-    setNewTicket({ subject: '', message: '' });
-    showToast('New ticket created successfully!', 'success');
+    try {
+      await updateTicket(ticket).unwrap();
+      showToast('Ticket updated successfully', 'success');
+      setIsEditModalOpen(false);
+    } catch (err) {
+      showToast('Failed to update ticket', 'error');
+    }
   };
+
+  const handleDelete = async (ticket_id: number) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteTicket(ticket_id).unwrap();
+        showToast("Deleted Successfully", 'success');
+      } catch (error: any) {
+        showToast('Vehicle not deleted successfully! Please try again.', 'warning');
+      }
+    }
+  }
+
+  const onSubmit = async (data: any) => {
+    const ticket = {
+      ...data,
+      user_id: user_id
+    };
+    try {
+      await addTicket(ticket).unwrap();
+      showToast('Ticket submitted successfully', 'success');
+      reset();
+      setIsCreateModalOpen(false);
+    } catch (err) {
+      showToast('Failed to submit ticket', 'error');
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center">Loading...</div>;
+  }
+  if (isError) {
+    return <div className="text-center">Failed to load tickets</div>;
+  }
 
   return (
     <div className="container mx-auto py-3 px-4">
       <h1 className="text-3xl font-bold text-center mb-4">My Support Tickets</h1>
 
-      <form onSubmit={handleSubmit} className="mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Create New Ticket</h2>
-        <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">Subject</label>
-          <input
-            type="text"
-            name="subject"
-            value={newTicket.subject}
-            onChange={handleInputChange}
-            className="input input-bordered w-full"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">Message</label>
-          <textarea
-            name="message"
-            value={newTicket.message}
-            onChange={handleInputChange}
-            className="textarea textarea-bordered w-full"
-            rows={4}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">Submit</button>
-      </form>
+      <button
+        className="btn btn-outline btn-info"
+        onClick={() => setIsCreateModalOpen(true)}
+      >
+        Create Ticket
+      </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {displayedTickets.length === 0 && (
-          <p className="text-center">No support tickets available 😒</p>
-        )}
-        {displayedTickets.slice((page - 1) * ticketsPerPage, page * ticketsPerPage).map(ticket => (
-          <div key={ticket.ticket_id} className="card w-full bg-base-100 shadow-xl">
-            <div className="card-body">
-              <h3 className="card-title">Ticket ID: {ticket.ticket_id}</h3>
-              <p>Date: {new Date(ticket.date).toLocaleDateString()}</p>
-              <p>Subject: {ticket.subject}</p>
-              <p>Status: <span className={`badge ${ticket.status === 'open' ? 'badge-success' : ticket.status === 'pending' ? 'badge-warning' : 'badge-error'}`}>{ticket.status}</span></p>
-              <p>Message: {ticket.message}</p>
+      {/* Create Ticket Modal */}
+      <dialog id="create_modal" className={`modal modal-bottom sm:modal-middle ${isCreateModalOpen ? 'modal-open' : ''}`}>
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Create a New Ticket</h3>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="subject">Subject</label>
+              <input
+                className="input input-bordered"
+                id="subject"
+                type="text"
+                {...register('subject', { required: true })}
+              />
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex justify-center mt-8">
-        <div className="btn-group">
-          <button
-            className="btn"
-            disabled={page === 1}
-            onClick={() => handlePageChange(page - 1)}
-          >
-            Previous
-          </button>
-          <button
-            className="btn"
-            disabled={page === Math.ceil(displayedTickets.length / ticketsPerPage)}
-            onClick={() => handlePageChange(page + 1)}
-          >
-            Next
-          </button>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="message">Message</label>
+              <textarea
+                className="textarea textarea-bordered"
+                id="message"
+                {...register('message', { required: true })}
+              ></textarea>
+            </div>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-outline">Submit</button>
+            </div>
+          </form>
         </div>
+      </dialog>
+
+      {/* Edit Ticket Modal */}
+      <dialog id="edit_modal" className={`modal modal-bottom sm:modal-middle ${isEditModalOpen ? 'modal-open' : ''}`}>
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Edit Ticket</h3>
+          <form onSubmit={handleEditTicket}>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="edit-subject">Subject</label>
+              <input
+                className="input input-bordered"
+                id="edit-subject"
+                type="text"
+                value={editForm.subject}
+                onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="edit-message">Message</label>
+              <textarea
+                className="textarea textarea-bordered"
+                id="edit-message"
+                value={editForm.message}
+                onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
+                required
+              ></textarea>
+            </div>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-outline">Save</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+
+      <div className="overflow-x-auto">
+        <table className="table table-zebra">
+          {/* head */}
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Subject</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {UserTickets && UserTickets.length > 0 ? (
+              UserTickets.map((ticket: Ticket) => (
+                <tr key={ticket.ticket_id}>
+                  <th>{ticket.ticket_id}</th>
+                  <td>{ticket.subject}</td>
+                  <td>{ticket.message}</td>
+                  <td>
+                    <span className={`badge ${ticket.status === 'open' ? 'badge-success' : 'badge-error'}`}>
+                      {ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}
+                    </span>
+                  </td>
+                  <td>
+                    {ticket.status === 'open' && (
+                      <>
+                        <button
+                          className="btn btn-info btn-outline mr-2"
+                          onClick={() => {
+                            setSelectedTicketId(ticket.ticket_id);
+                            setIsEditModalOpen(true);
+                          }}
+                        >
+                          <SquarePlus /> Edit
+                        </button>
+                        <button className="btn btn-error btn-outline" onClick={() => handleDelete(ticket.ticket_id)}> <Trash className="text-red-500" /> </button>
+
+                       </>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="text-center" colSpan={5}>No tickets found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

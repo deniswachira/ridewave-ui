@@ -154,7 +154,7 @@ function NewBookings() {
 
       {selectedBooking && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-md w-full">
+          <div className="bg-base-200 rounded-lg shadow-lg overflow-hidden max-w-md w-full">
             <div className="px-6 py-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Booking Details</h2>
@@ -225,7 +225,13 @@ function NewBookings() {
                     </tr>
                     <tr>
                       <td className="font-semibold">Payment Status:</td>
-                      <td>{paymentDetails.payment_status}</td>
+                      <td>
+                        {paymentDetails.payment_status === 'paid' ? (
+                          <span className="text-green-500">Success</span>
+                        ) : (
+                          <span className="text-red-500">Failed</span>
+                        )}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -233,7 +239,7 @@ function NewBookings() {
                 <p>No payment details found.</p>
               )}
             </div>
-            <div className="px-6 py-4 bg-gray-100 border-t border-gray-200 flex justify-end">
+            <div className="px-6 py-4 bg-base-100 border-t border-gray-200 flex justify-end">
               <button className="btn btn-primary mr-2" onClick={approveBooking} disabled={updateIsLoading}>Approve Booking</button>
               <button className="btn btn-secondary" onClick={rejectBooking} disabled={updateIsLoading}>Reject Booking</button>
               {/* <button className="btn btn-secondary" onClick={closePopup}>Close</button> */}

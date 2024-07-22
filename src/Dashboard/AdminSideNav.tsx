@@ -61,7 +61,7 @@ export default function AdminSideNav() {
                     <summary>
                         <Tags className="text-4xl text-blue-600 mr-4" />
                         <span className="text-blue-600 font-bold">Tickets</span>
-                    </summary>
+                    </summary>                    
                     <ul>
                         <li><Link to="tickets">All Tickets</Link></li>
                     </ul>
@@ -88,6 +88,7 @@ export default function AdminSideNav() {
                     <span className="text-green-600 font-bold">Home</span>
                 </Link>
             </li>
+            
         </ul>
     )
 }

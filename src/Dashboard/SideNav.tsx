@@ -35,6 +35,7 @@ function SideNav() {
                     <span className="hidden lg:inline ml-2 font-bold text-yellow-600">Payments</span>
                 </Link>
             </li>
+           
             <li>
                 <Link to="tickets" className="flex items-center">
                     <Ticket className="text-4xl text-yellow-600 mr-4" />

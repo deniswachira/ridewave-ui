@@ -92,7 +92,8 @@ const router = createBrowserRouter([
       {
         path: "tickets",
         element: <UserTickets />,
-      }
+      },
+     
     ]
   },
   {
@@ -147,7 +148,7 @@ const router = createBrowserRouter([
       {
         path: "tickets",
         element: <AllTicket />,
-      },
+      }
     ]
   },
 ]);
