@@ -11,6 +11,7 @@ import { NavLink } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { RootState } from '../app/store';
 import { useToast } from '../components/ToastContext';
+import { logsApi } from "../features/api/logsApiSlice";
 
 type FormValues = {
     email: string;
@@ -24,6 +25,7 @@ export default function Login() {
     const navigate = useNavigate();
     const { isAuthenticated, role } = useSelector((state: RootState) => state.auth);
     const { showToast } = useToast();
+    const [addLog] = logsApi.useAddLogMutation();
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -38,6 +40,7 @@ export default function Login() {
     const onSubmit = async (data: FormValues) => {
         try {
             const user = await loginUser(data).unwrap();
+            await addLog({ action: 'login', description: 'User logged in' }).unwrap();
             dispatch(setCredentials({ user, token: user.token, role: user.role }));
                 navigate('/');
            showToast('Login successful!', 'success');

@@ -6,6 +6,8 @@ import { RootState } from "../../app/store";
 import { useSelector } from "react-redux";
 import { SquarePlus, Trash } from "lucide-react";
 import Swal from "sweetalert2";
+import { logsApi } from "../../features/api/logsApiSlice";
+import AnimatedLoader from "../AnimatedLoader";
 
 interface Ticket {
   ticket_id: number;
@@ -24,7 +26,7 @@ function UserTickets() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editForm, setEditForm] = useState({ subject: '', message: '' });
-
+  const [addLog] = logsApi.useAddLogMutation();
   const { data: UserTickets, isError, isLoading } = ticketApi.useGetAllTicketsByUserIdQuery(user_id);
   const [addTicket] = ticketApi.useAddTicketMutation();
   const [updateTicket] = ticketApi.useUpdateTicketMutation();
@@ -96,6 +98,7 @@ function UserTickets() {
     };
     try {
       await addTicket(ticket).unwrap();
+      await addLog({ user_id: user_id, action: 'Created a new ticket' });
       showToast('Ticket submitted successfully', 'success');
       reset();
       setIsCreateModalOpen(false);
@@ -105,7 +108,7 @@ function UserTickets() {
   };
 
   if (isLoading) {
-    return <div className="text-center">Loading...</div>;
+    return <div className="text-center"><AnimatedLoader />Loading...</div>;
   }
   if (isError) {
     return <div className="text-center">Failed to load tickets</div>;
@@ -202,7 +205,7 @@ function UserTickets() {
         <table className="table table-zebra">
           {/* head */}
           <thead>
-            <tr>
+            <tr className="text-white text-xl">
               <th>#</th>
               <th>Subject</th>
               <th>Message</th>

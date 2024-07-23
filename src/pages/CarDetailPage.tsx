@@ -12,6 +12,7 @@ import { carApi } from "../features/api/carApiSlice";
 import {bookingApi} from "../features/api/bookingApiSlice";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastContext';
+import { logsApi } from "../features/api/logsApiSlice";
 import AnimatedLoader from '../components/AnimatedLoader';
 
 type BookingFormValues = {
@@ -20,24 +21,16 @@ type BookingFormValues = {
     location: string;
     notes: string;
 };
-// type bookingData = {
-//     booking_date: string;
-//     returning_date: string;
-//     location: string;
-//     notes: string;
-//     vehicle_id: number;
-//     user_id: number;
-//     total_amount: number;
-// };
+
 
 function CarDetailPage() {
-    // const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
     const { register, handleSubmit, watch, formState: { errors, } } = useForm<BookingFormValues>();
     const [addBooking, { isLoading : addBookingIsLoading }] = bookingApi.useAddBookingMutation();
     const user_id = user?.user.user_id;
     const { showToast } = useToast();
+    const [addLog] = logsApi.useAddLogMutation();
 
     const [totalAmount, setTotalAmount] = useState(0);
 
@@ -88,6 +81,8 @@ function CarDetailPage() {
 
         try {
             await addBooking(bookingData).unwrap();
+            await addLog({ user_id: user_id,action: `Booked : ${vehicleSpecificationTable.vehicle_name} vehicle`,
+            }).unwrap();
             showToast('Booking added successful!  proceeding  to Checkout page.', "success");
             navigate('/dashboard/me/my-bookings');
            

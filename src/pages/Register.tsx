@@ -36,6 +36,8 @@ export default function Register() {
         }
     };
 
+
+
     return (
         <>
             <Navbar />
@@ -71,6 +73,7 @@ export default function Register() {
                                     {isLoading ? <span className="loading loading-spinner text-error"></span> : 'Register'}
                                 </button>
                             </div>
+                               
                             <NavLink to="/" className="text-white mt-4 text-center block">
                                 🏡 Go to HomePage
                             </NavLink>
@@ -83,6 +86,7 @@ export default function Register() {
                                 </p>
                             </div>
                         </form>
+                       
                     </div>
                     <div className="flex items-center justify-center p-6">
                         <img src={loginPic} alt="Register Illustration" className="max-h-[80vh]" />

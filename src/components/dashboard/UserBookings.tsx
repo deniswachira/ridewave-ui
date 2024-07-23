@@ -9,6 +9,8 @@ import { useToast } from '../../components/ToastContext';
 import axios from "axios";
 import {  apiDomain } from "../../proxxy/proxxy";
 import AnimatedLoader from "../AnimatedLoader";
+import { Trash } from "lucide-react";
+import { logsApi } from "../../features/api/logsApiSlice";
 const stripePromise = loadStripe('pk_test_51PYWkuRsls6dWz1RBvlMFpPhiI1J9szlUjGxpgAvIXsx2kiC9OWDvnWD6PsEwbUU6CTdw0FJ2O3b0Y6rSXAZ0hc200wJCewxdF'); 
 
 function UserBookings() {
@@ -22,6 +24,7 @@ function UserBookings() {
   const [updateBooking] = bookingApi.useUpdateBookingMutation();
   const [displayedBookings, setDisplayedBookings] = useState<createBookingResponse[]>([]);
   const bookingsPerPage = 8;
+  const [addLog] = logsApi.useAddLogMutation();
 
   useEffect(() => {
     if (bookings.length > 0) {
@@ -43,6 +46,7 @@ function UserBookings() {
     if (result.isConfirmed) {
       try {
         const response = await deleteBooking(booking_id).unwrap();
+        await addLog({ user_id: user_id, action: `Deleted booking with ID: ${booking_id}` });
         showToast(response.msg, 'success');
       } catch (error: any) {
         console.error('Error deleting booking:', error.data.msg);
@@ -59,6 +63,7 @@ function UserBookings() {
         )
       );
       const response = await updateBooking({ booking_id, checkout_status: 'Awaiting Admin Approval' }).unwrap();
+      await addLog({ user_id: user_id, action: `Checked out booking with ID: ${booking_id}` });
       showToast(response.msg, 'success');
 
       // Your existing checkout logic here...
@@ -114,14 +119,14 @@ function UserBookings() {
                 <p>Total Amount: Ksh {booking.total_amount}</p> {/* Added total_amount here */}
                 <div className="card-actions justify-end">
                   <button
-                    className="btn btn-warning"
+                    className="btn btn-error "
                     onClick={() => handleDelete(booking.booking_id)}
                     disabled={deleteIsLoading}
                   >
-                    Delete
+                    <Trash/>
                   </button>
                   <button
-                    className="btn btn-success"
+                    className="btn btn-info "
                     onClick={() => handleCheckout(booking.booking_id)}
                     disabled={booking.checkout_status === 'Awaiting Admin Approval'}
                   >
