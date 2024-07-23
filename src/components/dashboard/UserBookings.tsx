@@ -72,7 +72,7 @@ function UserBookings() {
       
       const header = { 'Content-Type': 'application/json' };
 
-      const checkoutResponse = await axios.post(`${apiDomain}/create-checkout-session/${booking_id}`, JSON.stringify(booking), {
+      const checkoutResponse = await axios.post(`${apiDomain}create-checkout-session/${booking_id}`, JSON.stringify(booking), {
         headers: header,
       });
 
