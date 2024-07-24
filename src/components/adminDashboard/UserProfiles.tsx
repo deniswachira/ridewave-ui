@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { userApi } from "../../features/api/userApiSlice";
 import Swal from 'sweetalert2';
 import { useToast } from "../ToastContext";
+import AnimatedLoader from "../AnimatedLoader";
 
 interface User {
   user_id: number;
@@ -74,7 +75,47 @@ const UserProfiles = () => {
 
   return (
     <div className="container mx-auto py-2 px-4">
-      <h1 className="text-4xl font-bold text-center mb-8">User Profiles</h1>
+      <div className="breadcrumbs text-sm my-6 text-yellow-300">
+        <ul>
+          <li>
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 stroke-current">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 stroke-current">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
+              Admin
+            </a>
+          </li>
+          <li>
+            <span className="inline-flex items-center gap-2">              
+              All user profiles
+            </span>
+          </li>
+        </ul>
+      </div>
       <div className="mb-4 flex justify-between">
         <input
           type="text"
@@ -86,13 +127,13 @@ const UserProfiles = () => {
       </div>
       <div className="overflow-x-auto">
         {isLoading ? (
-          <p className="text-center">Loading...</p>
+          <p className="text-center"><AnimatedLoader/>  Loading...</p>
         ) : isError ? (
           <p className="text-center text-red-500">Error fetching user profiles.</p>
         ) : (
           <table className="table w-full">
             <thead>
-              <tr>
+              <tr className="text-white text-xl">
                 <th>Full Name</th>
                 <th>Contact Phone</th>
                 <th>Email</th>
@@ -108,7 +149,7 @@ const UserProfiles = () => {
                 </tr>
               ) : (
                 paginatedUsers.map(user => (
-                  <tr key={user.user_id}>
+                  <tr key={user.user_id} className="text-xl">
                     <td>{user.full_name}</td>
                     <td>{user.phone_number}</td>
                     <td>{user.email}</td>
@@ -139,14 +180,14 @@ const UserProfiles = () => {
       <div className="flex justify-center mt-8">
         <div className="btn-group">
           <button
-            className="btn"
+            className="btn btn-outline mr-2"
             disabled={page === 1}
             onClick={() => handlePageChange(page - 1)}
           >
             Previous
           </button>
           <button
-            className="btn"
+            className="btn btn-outline "
             disabled={page === Math.ceil(filteredUsers.length / usersPerPage)}
             onClick={() => handlePageChange(page + 1)}
           >

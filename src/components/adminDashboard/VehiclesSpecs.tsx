@@ -126,7 +126,47 @@ const VehiclesSpecs: React.FC = () => {
 
     return (
         <div className="container mx-auto py-5 px-4">
-            <h1 className="text-xl font-bold text-center">All Vehicle Specifications</h1>
+            <div className="breadcrumbs text-sm my-6 text-yellow-300">
+                <ul>
+                    <li>
+                        <a>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                className="h-4 w-4 stroke-current">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                className="h-4 w-4 stroke-current">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                            </svg>
+                            Admin
+                        </a>
+                    </li>
+                    <li>
+                        <span className="inline-flex items-center gap-2">
+                            Vehicles Specification Management 
+                        </span>
+                    </li>
+                </ul>
+            </div>
             <div className="mb-4 flex justify-between">
                 <Link to="add-vehicle-spec">
                     <button type="button" className="btn btn-warning btn-outline"><SquarePlus />Add Vehicle Specifications</button>

@@ -3,6 +3,11 @@ import { bookingApi } from "../../features/api/bookingApiSlice";
 import { paymentApi } from "../../features/api/paymentApiSlice";
 import AnimatedLoader from "../AnimatedLoader";
 import { logsApi } from "../../features/api/logsApiSlice";
+import { CheckCircle, LucideView } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import { useToast } from '../../components/ToastContext';
+
 
 interface Booking {
   checkout_status: string;
@@ -17,7 +22,13 @@ interface Booking {
 }
 
 function NewBookings() {
-  const { data: Allbookings = [] } = bookingApi.useFetchBookingsQuery({});
+  const { data: Allbookings = [] } = bookingApi.useFetchBookingsQuery(1,{
+    pollingInterval: 50000,
+    refetchOnMountOrArgChange: true,
+  });
+  const { showToast } = useToast();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const user_id = user?.user.user_id;
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [page, setPage] = useState(1);
@@ -60,7 +71,8 @@ function NewBookings() {
     if (!selectedBooking) return;
     try {
       await updateBooking({ booking_id: selectedBooking.booking_id, booking_status: 'approved' }).unwrap();
-      await addLog({ log: `Approved Booking ID: ${selectedBooking.booking_id} ` }).unwrap();
+      await addLog({ user_id:user_id, action: `Approved Booking ID: ${selectedBooking.booking_id} ` }).unwrap();
+      showToast('Approved the booking', 'success');
       setBookings(prevBookings =>
         prevBookings.map(booking =>
           booking.booking_id === selectedBooking.booking_id ? { ...booking, booking_status: 'approved' } : booking
@@ -68,6 +80,7 @@ function NewBookings() {
       );
       closePopup();
     } catch (error) {
+      showToast('Error while approving', 'error');
       console.error('Error approving booking:', error);
     }
   };
@@ -76,7 +89,8 @@ function NewBookings() {
     if (!selectedBooking) return;
     try {
       await updateBooking({ booking_id: selectedBooking.booking_id, booking_status: 'rejected' }).unwrap();
-      await addLog({ log: `Rejected Booking ID: ${selectedBooking.booking_id} ` }).unwrap();
+      await addLog({ user_id:user_id,  action: `Rejected Booking ID: ${selectedBooking.booking_id} ` }).unwrap();
+      showToast('Rejected the booking', 'success');
       setBookings(prevBookings =>
         prevBookings.map(booking =>
           booking.booking_id === selectedBooking.booking_id ? { ...booking, booking_status: 'rejected' } : booking
@@ -85,6 +99,7 @@ function NewBookings() {
       closePopup();
     } catch (error) {
       console.error('Error rejecting booking:', error);
+      showToast('Error while rejecting', 'error');
     }
   };
 
@@ -92,7 +107,48 @@ function NewBookings() {
 
   return (
     <div className="container mx-auto py-5 px-4">
-      <h1 className="text-4xl font-bold text-center mb-8">Pending Bookings</h1>
+      <div className="breadcrumbs text-sm my-6 text-yellow-300">
+        <ul>
+          <li>
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 stroke-current">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 stroke-current">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
+              Admin
+            </a>
+          </li>
+          <li>
+            <span className="inline-flex items-center gap-2">
+              
+              All Pending Bookings
+            </span>
+          </li>
+        </ul>
+      </div>
       <div className="mb-4 flex justify-between">
         <input
           type="text"
@@ -105,7 +161,7 @@ function NewBookings() {
       <div className="overflow-x-auto">
         <table className="table w-full">
           <thead>
-            <tr>
+            <tr className="text-white text-xl">
               <th>Booking ID</th>
               <th>Location</th>
               <th>Booking Date</th>
@@ -121,14 +177,14 @@ function NewBookings() {
               </tr>
             ) : (
               paginatedBookings.map(booking => (
-                <tr key={booking.booking_id}>
+                <tr key={booking.booking_id} className="text-xl">
                   <td>{booking.booking_id}</td>
                   <td>{booking.location}</td>
                   <td>{new Date(booking.booking_date).toLocaleDateString()}</td>
                   <td>{new Date(booking.returning_date).toLocaleDateString()}</td>
                   <td>Ksh: {booking.total_amount}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => openPopup(booking)}>View Details</button>
+                    <button className="btn btn-primary btn-outline" onClick={() => openPopup(booking)}><LucideView/> View Details</button>
                   </td>
                 </tr>
               ))
@@ -160,7 +216,7 @@ function NewBookings() {
           <div className="bg-base-200 rounded-lg shadow-lg overflow-hidden max-w-md w-full">
             <div className="px-6 py-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Booking Details</h2>
+                <h2 className="text-xl font-semibold text-white">Booking Details</h2>
                 <button
                   className="text-gray-500 hover:text-gray-700 focus:outline-none"
                   onClick={closePopup}
@@ -191,11 +247,11 @@ function NewBookings() {
                   </tr>
                   <tr>
                     <td className="font-semibold">Amount:</td>
-                    <td>Ksh {selectedBooking.total_amount}</td>
+                    <td className="text-white">Ksh {selectedBooking.total_amount}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold">Checkout Status:</td>
-                    <td>{selectedBooking.checkout_status}</td>
+                    <td className="font-semibold ">Checkout Status:</td>
+                    <td className="text-blue-600">{selectedBooking.checkout_status}</td>
                   </tr>
                 </tbody>
               </table>
@@ -220,7 +276,7 @@ function NewBookings() {
                     </tr>
                     <tr>
                       <td className="font-semibold">Amount Paid:</td>
-                      <td>Ksh {paymentDetails.payment_amount}</td>
+                        <td className="text-white">Ksh {paymentDetails.payment_amount}</td>
                     </tr>
                     <tr>
                       <td className="font-semibold">Payment Date:</td>
@@ -230,7 +286,7 @@ function NewBookings() {
                       <td className="font-semibold">Payment Status:</td>
                       <td>
                         {paymentDetails.payment_status === 'paid' ? (
-                          <span className="text-green-500">Success</span>
+                          <span className="text-yellow-500">Success</span>
                         ) : (
                           <span className="text-red-500">Failed</span>
                         )}
@@ -239,12 +295,12 @@ function NewBookings() {
                   </tbody>
                 </table>
               ) : (
-                <p>No payment details found.</p>
+                <p className="text-red-600 font-semibold">No payment details found.😒</p>
               )}
             </div>
             <div className="px-6 py-4 bg-base-100 border-t border-gray-200 flex justify-end">
-              <button className="btn btn-primary mr-2" onClick={approveBooking} disabled={updateIsLoading}>Approve Booking</button>
-              <button className="btn btn-secondary" onClick={rejectBooking} disabled={updateIsLoading}>Reject Booking</button>
+              <button className="btn btn-info mr-2 btn-outline" onClick={approveBooking} disabled={updateIsLoading}><CheckCircle/>  Approve Booking</button>
+              <button className="btn btn-error" onClick={rejectBooking} disabled={updateIsLoading}> Reject Booking</button>
               {/* <button className="btn btn-secondary" onClick={closePopup}>Close</button> */}
             </div>
           </div>
