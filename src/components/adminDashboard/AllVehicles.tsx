@@ -100,7 +100,7 @@ const AllVehicles: React.FC = () => {
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
-                        <tr>
+                        <tr className="text-white text-xl">
                             <th>Vehicle ID</th>
                             <th>Vehicle Name</th>
                             <th>Rental rate</th>
@@ -115,7 +115,7 @@ const AllVehicles: React.FC = () => {
                             </tr>
                         ) : (
                             paginatedSpecs.map(vehicle => (
-                                <tr key={vehicle.vehicle_id}>
+                                <tr key={vehicle.vehicle_id} className="text-xl">
                                     <td>{vehicle.vehicle_id}</td>
                                     <td>{vehicle.vehicleSpec.vehicle_name}</td>
                                     <td>{vehicle.rental_rate}</td>

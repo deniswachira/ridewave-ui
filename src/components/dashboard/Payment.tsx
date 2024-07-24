@@ -46,8 +46,8 @@ const Payment = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white  ">
 
-      <div className="max-w-4xl mx-auto mt-2 bg-gray-800 p-5 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Payment History</h2>
+      <h2 className="text-xl font-bold mb-4 flex justify-center items-center text-green-400">Payment History</h2>
+      <div className="mx-auto mt-2 p-5 ">
         {isLoading ? (
           <div className="flex justify-center items-center">
             <AnimatedLoader />
@@ -55,7 +55,7 @@ const Payment = () => {
         ) : (
           <table className="table w-full">
             <thead>
-              <tr>
+                <tr className=" text-xl">
                 <th>Payment ID</th>
                 <th>Vehicle Name</th>
                 <th>Amount (Ksh)</th>

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { ticketApi } from "../../features/api/ticketApiSlice";
 import { useToast } from '../../components/ToastContext';
+import { logsApi } from "../../features/api/logsApiSlice";
+import { RootState } from "../../app/store";
 import AnimatedLoader from "../AnimatedLoader";
+import { useSelector } from "react-redux";
 
 interface Ticket {
     ticket_id: number;
@@ -23,6 +26,9 @@ const AllTicket = () => {
     });
     const [updateTicket] = ticketApi.useUpdateTicketMutation();
     const { showToast } = useToast();
+    const { user } = useSelector((state: RootState) => state.auth);
+    const user_id = user?.user.user_id;
+    const [addLog] = logsApi.useAddLogMutation();
 
     useEffect(() => {
         if (allUserTickets) {
@@ -33,6 +39,7 @@ const AllTicket = () => {
     const handleUpdateStatus = async (ticket_id: number, status: string) => {
         try {
             await updateTicket({ ticket_id: ticket_id, status }).unwrap();
+            await addLog({user_id, action: `Ticket ${ticket_id} status updated to ${status}`}).unwrap();
             showToast('Ticket status updated successfully', 'success');
         } catch (err) {
             showToast('Failed to update ticket status', 'error');
@@ -56,7 +63,7 @@ const AllTicket = () => {
 
             <h2 className="text-2xl font-bold mb-4">Pending Tickets</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-                {pendingTickets.map((ticket) => (
+                {pendingTickets.map((ticket: Ticket) => (
                     <div key={ticket.ticket_id} className="card shadow-lg p-5 bg-base-200">
                         <h3 className="text-xl font-bold"> <span className="text-white">Ticket ID: </span>{ticket.ticket_id}</h3>
                         <h3 className="text-xl font-bold"> <span className="text-white">Title: </span>{ticket.subject}</h3>
@@ -78,7 +85,7 @@ const AllTicket = () => {
             <div className="overflow-x-auto">
                 <table className="table table-zebra">
                     <thead>
-                        <tr>
+                        <tr className="text-white text-xl">
                             <th>#</th>
                             <th>Subject</th>
                             <th>Message</th>
@@ -88,7 +95,7 @@ const AllTicket = () => {
                     </thead>
                     <tbody>
                         {closedTickets.map((ticket) => (
-                            <tr key={ticket.ticket_id}>
+                            <tr key={ticket.ticket_id} className="text-xl">
                                 <th>{ticket.ticket_id}</th>
                                 <td>{ticket.subject}</td>
                                 <td>{ticket.message}</td>

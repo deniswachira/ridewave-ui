@@ -155,7 +155,7 @@ function UserTickets() {
               >
                 Cancel
               </button>
-              <button type="submit" className="btn btn-outline">Submit</button>
+              <button type="submit" className="btn btn-outline btn-info">Submit</button>
             </div>
           </form>
         </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { bookingApi } from "../../features/api/bookingApiSlice";
 import { paymentApi } from "../../features/api/paymentApiSlice";
 import AnimatedLoader from "../AnimatedLoader";
+import { logsApi } from "../../features/api/logsApiSlice";
 
 interface Booking {
   checkout_status: string;
@@ -27,7 +28,7 @@ function NewBookings() {
     skip: !selectedBooking,
   });
   const [updateBooking, { isLoading: updateIsLoading }] = bookingApi.useUpdateBookingMutation();
-
+  const [addLog] = logsApi.useAddLogMutation();
   useEffect(() => {
     if (Allbookings.length > 0) {
       setBookings(Allbookings);
@@ -59,6 +60,7 @@ function NewBookings() {
     if (!selectedBooking) return;
     try {
       await updateBooking({ booking_id: selectedBooking.booking_id, booking_status: 'approved' }).unwrap();
+      await addLog({ log: `Approved Booking ID: ${selectedBooking.booking_id} ` }).unwrap();
       setBookings(prevBookings =>
         prevBookings.map(booking =>
           booking.booking_id === selectedBooking.booking_id ? { ...booking, booking_status: 'approved' } : booking
@@ -74,6 +76,7 @@ function NewBookings() {
     if (!selectedBooking) return;
     try {
       await updateBooking({ booking_id: selectedBooking.booking_id, booking_status: 'rejected' }).unwrap();
+      await addLog({ log: `Rejected Booking ID: ${selectedBooking.booking_id} ` }).unwrap();
       setBookings(prevBookings =>
         prevBookings.map(booking =>
           booking.booking_id === selectedBooking.booking_id ? { ...booking, booking_status: 'rejected' } : booking
@@ -169,8 +172,8 @@ function NewBookings() {
               </div>
               <hr className="my-2" />
               <table className="table-auto w-full">
-                <tbody>
-                  <tr>
+                <tbody >
+                  <tr  >
                     <td className="font-semibold">Booking ID:</td>
                     <td>{selectedBooking.booking_id}</td>
                   </tr>

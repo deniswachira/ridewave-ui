@@ -101,7 +101,7 @@ function AllPayments() {
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
-                        <tr>
+                        <tr className="text-white text-xl">
                             <th>Payment ID</th>
                             <th>Booking ID</th>
                             <th>User</th>
@@ -119,7 +119,7 @@ function AllPayments() {
                             </tr>
                         ) : (
                             paginatedPayments.map(payment => (
-                                <tr key={payment.payment_id}>
+                                <tr key={payment.payment_id} className="text-xl">
                                     <td>{payment.payment_id}</td>
                                     <td>{payment.booking_id}</td>
                                     <td>

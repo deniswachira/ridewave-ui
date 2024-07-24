@@ -109,7 +109,7 @@ function UserBookings() {
         {!isLoading && isError && <p className="text-red-500 text-center">Error: {isError.toString()}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {pendingBookings.length === 0 && (
-            <p className="text-center">No pending bookings available 😒</p>
+            <p className="text-center text-blue-500">No pending bookings available 😒</p>
           )}
           {pendingBookings.map(booking => (
             <div key={booking.booking_id} className="card w-full bg-base-100 shadow-xl">
@@ -143,7 +143,7 @@ function UserBookings() {
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
-              <tr>
+              <tr className="text-white text-xl">
                 <th>Booking ID</th>
                 <th>Booking Date</th>
                 <th>Returning Date</th>
@@ -175,16 +175,16 @@ function UserBookings() {
           </table>
         </div>
         <div className="flex justify-center mt-8">
-          <div className="btn-group">
+          <div className="btn-group ">
             <button
-              className="btn"
+              className="btn mr-2"
               disabled={page === 1}
               onClick={() => handlePageChange(page - 1)}
             >
               Previous
             </button>
             <button
-              className="btn"
+              className="btn btn-outline"
               disabled={page === Math.ceil(confirmedBookings.length / bookingsPerPage)}
               onClick={() => handlePageChange(page + 1)}
             >

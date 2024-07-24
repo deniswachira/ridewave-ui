@@ -76,7 +76,7 @@ function AllBookings() {
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
-                        <tr>
+                        <tr className="text-white text-xl">
                             <th>Booking ID</th>
                             <th>User Booked</th>
                             <th>Location</th>
@@ -93,7 +93,7 @@ function AllBookings() {
                             </tr>
                         ) : (
                             paginatedBookings.map(booking => (
-                                <tr key={booking.booking_id}>
+                                <tr key={booking.booking_id} className=" text-xl">
                                     <td>{booking.booking_id}</td>
                                     <td>{booking.user.full_name}</td>
                                     <td>{booking.location}</td>

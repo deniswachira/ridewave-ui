@@ -6,6 +6,9 @@ import { useToast } from '../ToastContext';
 import { AddVehiclePayload } from '../../types/Types';
 import { SquarePlus, Trash, X } from 'lucide-react';
 import AnimatedLoader from '../AnimatedLoader';
+import { logsApi } from "../../features/api/logsApiSlice";
+import { RootState } from "../../app/store";
+import { useSelector } from 'react-redux';
 
 export interface VehicleSpecs {
     vehicleSpec_id: number;
@@ -40,7 +43,9 @@ const VehiclesSpecs: React.FC = () => {
     const [selectedVehicleSpecId, setSelectedVehicleSpecId] = useState<number | null>(null); // Selected vehicle spec ID
     const [rentalRate, setRentalRate] = useState<number | ''>(''); // Rental rate state
     const [availability, setAvailability] = useState<string>('Available');
-
+    const [addLog] = logsApi.useAddLogMutation();
+    const { user } = useSelector((state: RootState) => state.auth);
+    const user_id = user?.user.user_id;
 
     useEffect(() => {
         if (vehicleSpecs) {
@@ -72,6 +77,7 @@ const VehiclesSpecs: React.FC = () => {
         if (result.isConfirmed) {
             try {
                 await deleteCarSpec(vehicleSpec_id).unwrap();
+                await addLog({user_id:user_id,   action: `Deleted vehicle specification with ID: ${vehicleSpec_id}`});
                 showToast("Deleted Successfully", 'success');
             } catch (error: any) {
                
@@ -98,6 +104,7 @@ const VehiclesSpecs: React.FC = () => {
             };
 
             await addVehicle(vehicleData).unwrap();
+            await addLog({user_id:user_id,   action: `Added vehicle with ID: ${selectedVehicleSpecId}`});
             showToast('Vehicle added successfully!', 'success');
             setIsModalOpen(false); // Close the modal after adding
             setRentalRate(''); // Reset rental rate
@@ -135,7 +142,7 @@ const VehiclesSpecs: React.FC = () => {
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
-                        <tr>
+                        <tr className="text-white text-xl">
                             <th>ID</th>
                             <th>Vehicle Name</th>
                             <th>Vehicle Model</th>
@@ -153,7 +160,7 @@ const VehiclesSpecs: React.FC = () => {
                             </tr>
                         ) : (
                             paginatedSpecs.map(spec => (
-                                <tr key={spec.vehicleSpec_id}>
+                                <tr key={spec.vehicleSpec_id} className="text-xl">
                                     <td>{spec.vehicleSpec_id}</td>
                                     <td>{spec.vehicle_name}</td>
                                     <td>{spec.vehicle_model}</td>
